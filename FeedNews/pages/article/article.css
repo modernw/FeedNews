@@ -1,0 +1,130 @@
+﻿.article section {
+    margin: auto 120px;
+}
+
+.phone .article .page-section.article-html-section {
+    margin: auto 24px;
+}
+
+.phone .article .page-header .titlearea {
+    -ms-grid-column: 1;
+    margin-top: 37px;
+    margin-left: 24px;
+    font-size: 28pt;
+    width: calc(100vw - 20px);
+}
+
+.phone .article .back-button {
+    display: none;
+}
+
+.fragment {
+    -ms-grid-columns: 1fr;
+    -ms-grid-rows: 128px 1fr;
+    display: -ms-grid;
+    height: 100%;
+    width: 100%;
+}
+
+    .fragment section[role=main] {
+        -ms-grid-row: 2;
+        height: 100%;
+    }
+
+.article .article-html-section {
+    margin: 0;
+}
+
+.article-html-section .article-area {
+    width: 100%;
+    height: 100%;
+    padding: 40px 120px 50px;
+    column-width: 400px;
+    overflow-x: auto;
+    overflow-y: auto;
+    box-sizing: border-box;
+    column-rule: 1px solid wheat;
+    column-fill: auto;
+    column-gap: 50px;
+    -ms-user-select: element;
+}
+
+    .article-html-section .article-area img,
+    .article-html-section .article-area video,
+    .article-html-section .article-area audio,
+    .article-html-section .article-area div {
+        width: 100%;
+        max-width: 100%;
+        height: auto; /* 自动高度，保持宽高比 */
+        max-height: none;
+        box-sizing: border-box;
+    }
+
+.phone .article-html-section .article-area {
+    width: 100%;
+    height: 100%;
+    padding: 24px;
+    column-width: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+    column-rule: none;
+    column-fill: auto;
+    column-gap: 0;
+    -ms-user-select: element;
+}
+
+.article-html-section .article-area table {
+    width: 100%;
+}
+
+    .article-html-section .article-area table tr td {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.52);
+        border-right: 3px solid rgba(0, 0, 0, 0);
+    }
+
+.media-viewer {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 100;
+}
+
+.media-viewer .media-viewer-close-button {
+    position: absolute;
+    top: 59px;
+    right: 11px;
+    z-index: 102;
+}
+
+.media-viewer .fullscreen-container {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 101;
+}
+
+.media-viewer-displaytemplate {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+.media-viewer-displaytemplate * {
+    width: auto;
+    height: auto;
+}
+
+.media-viewer .fullscreen-container .win-navbutton {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+}

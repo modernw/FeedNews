@@ -1,0 +1,56 @@
+﻿.webview section {
+	margin: auto 120px;
+}
+
+.phone .webview .page-section {
+	margin: auto 24px;
+}
+
+.phone .webview .page-header .titlearea {
+	-ms-grid-column: 1;
+	margin-top: 37px;
+	margin-left: 24px;
+	font-size: 28pt;
+	width: calc(100vw - 20px);
+}
+
+.phone .webview .back-button {
+	display: none;
+}
+
+.fragment {
+	-ms-grid-columns: 1fr;
+	-ms-grid-rows: 128px 1fr;
+	display: -ms-grid;
+	height: 100%;
+	width: 100%;
+}
+
+	.fragment section[role=main] {
+		-ms-grid-row: 2;
+		height: 100%;
+	}
+
+.webview-html-body .webview-feedviewer {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
+    left: 120px;
+    border: none;
+    width: calc(100% - 120px);
+    height: 100%;
+}
+
+.webview-html-body .back-button {
+    /*
+        position: absolute;
+    top: 77px;
+    left: 68px;
+    border-color: black;
+    */
+}
+
+.pagetitlewb-backbutton {
+    border-color: black;
+}

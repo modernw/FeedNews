@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <title>homePage</title>
+
+    <!-- WinJS 引用 -->
+    <link href="//Microsoft.WinJS.2.0/css/ui-light.css" rel="stylesheet" />
+    <script src="//Microsoft.WinJS.2.0/js/base.js"></script>
+    <script src="//Microsoft.WinJS.2.0/js/ui.js"></script>
+
+    <script src="/js/public.js"></script>
+    <script src="/js/fetch.js"></script>
+    <script src="/js/file.js"></script>
+    <script src="/js/feed.js"></script>
+    <script src="/js//tiletemplate.js"></script>
+    <script src="/js/feedmgr.js"></script>
+    <script src="/js/animation.js"></script>
+    <link href="/css/default.css" rel="stylesheet" />
+    <link href="home.css" rel="stylesheet" />
+    <script src="home.js"></script>
+</head>
+<body>
+    <div id="itemFeedTemplate" data-win-control="WinJS.Binding.Template">
+        <div class="feeditem">
+            <div class="feedcover" data-win-bind="style.backgroundImage: cover"></div>
+            <div class="feedinfo">
+                <div class="feedcontent">
+                    <h1 class="feedtitle" data-win-bind="textContent: title">标题 Title</h1>
+                    <div class="feedsrcbar">
+                        <span class="feedauthor" data-win-bind="textContent: author">作者 Author</span>
+                        <span class="feedchannel" data-win-bind="textContent: channel">频道 Channel</span>
+                    </div>
+                    <span class="feedpubdate" data-win-bind="textContent: pubdate">YYYY-MM-DD HH:MM:SS</span>
+                </div>
+                <div class="feedcontrol"></div>
+            </div>
+        </div>
+    </div>
+    <div id="channellist" class="slidebar home-html-sliderbar" style="background-color: gray; left: 180px; width: 150px; display: none;"></div>
+    <div id="providerlist" class="slidebar home-html-sliderbar" style="background-color: #303030; position: absolute; width: 180px;"></div>
+    <!-- 将加载和显示的内容。 -->
+    <div class="fragment homepage itemspage home-html-homepage home-html-itemspage home-html-fragment" style="left: calc(180px + 150px); width: calc(100% - 180px - 150px); position: absolute; top: 0px;">
+        <header aria-label="Header content" role="banner" class="home-html-page-header">
+            <button data-win-control="WinJS.UI.BackButton"></button>
+            <h1 class="titlearea win-type-ellipsis">
+                <span class="pagetitle">Feed News</span>
+            </h1>
+        </header>
+        <div id="categorylist" class="home-html-sliderbar slidebar" style="">
+            <div class="item light" tabindex="0"><span>item 1</span></div>
+            <div class="item selected light"><span>item 2</span></div>
+        </div>
+        <section aria-label="Main content" role="main" class="home-html-section">
+            <div id="listviewbox" class="itemslist win-selectionstylefilled home-html-listview" aria-label="List of groups" data-win-control="WinJS.UI.ListView" data-win-options="{
+                    selectionMode: 'none',
+                    currentItem: {type: WinJS.UI.ObjectType.item, index: 0, hasFocus: true},
+                    itemTemplate: select('#itemFeedTemplate'),
+                     layout: { type: WinJS.UI.GridLayout, orientation: 'horizontal' }
+                }">
+                <p>还没有内容...</p>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

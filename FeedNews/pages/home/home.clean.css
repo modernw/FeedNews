@@ -1,0 +1,148 @@
+﻿/* ===================== 通用布局 ===================== */
+.fragment {
+    display: -ms-grid;
+    height: 100%;
+    width: 100%;
+}
+.page-header .titlearea {
+    font-size: inherit;
+}
+
+/* ===================== Home 独有 ===================== */
+.home-html-fragment .home-html-section {
+    margin: auto 0 0 0;
+    -ms-grid-row: 3 !important;
+}
+.home-html-fragment .home-html-homepage {
+    -ms-grid-rows: 128px 45px 1fr !important;
+}
+.home-html-fragment .home-html-sliderbar {
+    height: 100%;
+    position: absolute;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+}
+.home-html-fragment #categorylist {
+    padding: 0 120px;
+    position: relative;
+    height: 30pt;
+    box-sizing: border-box;
+    width: 100%;
+    -ms-grid-column: 1;
+    -ms-grid-row: 2;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-direction: row;
+    background-color: transparent;
+}
+.home-html-fragment #listviewbox.home-html-listview {
+    margin: 0;
+    padding: 0 120px;
+    -ms-grid-row: 3;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* ===================== Feed Item ===================== */
+.home-html-fragment .feeditem {
+    width: 500px;
+    height: 180px;
+    box-sizing: content-box;
+    word-break: break-all;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    -ms-flex-direction: row;
+    -ms-flex-wrap: nowrap;
+    justify-content: flex-start;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+    color: black;
+}
+.home-html-fragment .feeditem .feedcover {
+    position: relative;
+    height: 180px;
+    width: 180px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    pointer-events: none;
+}
+.home-html-fragment .feeditem .feedcover:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 1px solid rgba(254,254,254,0.1);
+}
+.home-html-fragment .feeditem .feedinfo {
+    width: calc(100% - 180px);
+    height: 100%;
+    pointer-events: none;
+}
+.home-html-fragment .feeditem .feedinfo .feedcontent {
+    padding: 5px;
+    height: 100%;
+    box-sizing: border-box;
+}
+.home-html-fragment .feeditem .feedinfo .feedcontent .feedtitle {
+    font-weight: lighter;
+    font-size: 18pt;
+    width: 100%;
+    text-overflow: ellipsis;
+    line-height: 1.3em;
+    height: 5.3em;
+    overflow: hidden;
+    text-align: left;
+    vertical-align: top;
+    max-width: 100%;
+    padding: 2px;
+    box-sizing: border-box;
+}
+.home-html-fragment .feeditem .feedinfo .feedcontent .feedsrcbar {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+    padding: 2px;
+    line-height: 1.2em;
+}
+.home-html-fragment .feeditem .feedinfo .feedcontent .feedsrcbar .feedauthor {
+    text-align: left;
+}
+.home-html-fragment .feeditem .feedinfo .feedcontent .feedsrcbar .feedchannel {
+    text-align: right;
+    color: rgb(63, 63, 63);
+    float: right;
+}
+.home-html-fragment .feeditem .feedinfo .feedcontent .feedpubdate {
+    width: 100%;
+    display: inline-block;
+    padding: 2px;
+    line-height: 1.2em;
+    text-align: left;
+}
+.home-html-fragment .feeditem:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+}
+.home-html-fragment .feeditem:active {
+    background-color: rgba(0, 92, 206, 0.15);
+}
+
+/* ===================== Item List ===================== */
+.home-html-fragment .itemslist {
+    height: 100%;
+    position: relative;
+    width: 100%;
+    z-index: 0;
+    box-sizing: border-box;
+}
+.home-html-fragment .itemslist .win-horizontal.win-viewport .win-surface {
+    margin-left: 115px;
+    margin-right: 115px;
+}
