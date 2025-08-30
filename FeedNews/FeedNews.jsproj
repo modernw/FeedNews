@@ -123,8 +123,10 @@
     <Content Include="js\feedmgr.js" />
     <Content Include="js\fetch.js" />
     <Content Include="js\file.js" />
+    <Content Include="js\mediaelement.js" />
     <Content Include="js\navigator.js" />
     <Content Include="js\public.js" />
+    <Content Include="js\event.js" />
     <Content Include="js\tiletemplate.js" />
     <Content Include="pages\article\article.clean.css" />
     <Content Include="pages\article\article.css" />

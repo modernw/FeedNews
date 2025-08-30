@@ -7,8 +7,11 @@
     <link href="//Microsoft.WinJS.2.0/css/ui-dark.css" rel="stylesheet" />
     <script src="//Microsoft.WinJS.2.0/js/base.js"></script>
     <script src="//Microsoft.WinJS.2.0/js/ui.js"></script>
+    <script src="/js/public.js"></script>
     <script src="/js/file.js"></script>
     <script src="/js/tiletemplate.js"></script>
+    <script src="/js/event.js"></script>
+    <script src="/js/mediaelement.js"></script>
     <link href="article.css" rel="stylesheet" />
     <script src="article.js"></script>
 </head>
@@ -27,11 +30,20 @@
     <template id="media-viewer-displaytemplate" data-win-control="WinJS.Binding.Template">
         <div class="media-viewer-displaytemplate" data-win-bind="innerHTML: innerHTML"></div>
     </template>
-    <div id="media-viewer" class="media-viewer win-ui-dark" style="display: none;">
+    <div id="media-viewer" class="media-viewer win-ui-dark" style="opacity: 0;">
         <button class="win-commandicon win-commandring media-viewer-close-button" id="media-hide-button" style="background-color: rgba(0, 0, 0, 0.5);">
             <span class="win-commandimage">&#57508;</span>
         </button>
         <div class="fullscreen-container" data-win-control="WinJS.UI.FlipView" id="media-flip-container" data-win-options="{ itemTemplate: select('#media-viewer-displaytemplate') }"></div>
     </div>
+    <!-- 
+        <div id="v_a_viewmenu" data-win-control="WinJS.UI.Menu">
+        <button data-win-control="WinJS.UI.MenuCommand" data-win-options="{label:'浏览', onclick: function(){alert('动作1')}}"></button>
+        <button data-win-control="WinJS.UI.MenuCommand" data-win-options="{label:'下载', onclick: function(){alert('动作2')}}"></button>
+    </div>
+    <div id="media_optionmenu" data-win-control="WinJS.UI.Menu">
+        <button data-win-control="WinJS.UI.MenuCommand" data-win-options="{label:'下载', onclick: function(){alert('动作1')}}"></button>
+    </div>
+        -->
 </body>
 </html>

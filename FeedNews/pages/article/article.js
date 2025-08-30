@@ -30,7 +30,7 @@
             var img = imgs[i];
             var src = img.getAttribute('src');
             if (src && src.indexOf('/') === 0) {
-                img.src = baseUrl + src; 
+                img.src = baseUrl + src;
             }
         }
         return container;
@@ -170,15 +170,28 @@
                         }
                         content.appendChild(webbutton);
                     }
+
                     var flipshl = document.getElementById("media-viewer");
+                    flipshl.style.pointEvent = "none";
+                    setTimeout(function () {
+                        flipshl.style.pointEvent = "";
+                        flipshl.style.display = "none";
+                        flipshl.style.opacity = "";
+                    }, 500);
                     var flipviewe = document.getElementById("media-flip-container");
                     var hideflip = document.getElementById("media-hide-button");
-                    hideflip.addEventListener ("click", function () {
+                    hideflip.addEventListener("click", function () {
                         WinJS.UI.Animation.fadeOut(flipshl).done(function () {
                             flipshl.style.display = "none";
+                            if (currentE) {
+                                if (NString.equals(currentE.tagName, "video") || NString.equals(currentE.tagName, "audio")) {
+                                    currentE.pause();
+                                }
+                            }
                         });
                     });
                     var flipv = flipviewe.winControl;
+                    var currentE = null;
                     var displayEle = content.querySelectorAll("img, audio, video");
                     var MediaType = {
                         image: "img",
@@ -191,16 +204,131 @@
                         this.innerHTML = "";
                     };
                     var datas = new WinJS.Binding.List();
+                    var clone = flipviewe.cloneNode(true);
+                    clone.style.display = "";
+                    clone.style.opacity = 1;
+                    content.appendChild(clone);
                     flipv.itemDataSource = datas.dataSource;
+                    var myTemplate = new WinJS.Binding.Template(document.querySelector(".media-viewer-displaytemplate"));
                     flipv.itemTemplate = function (itemPromise) {
                         return itemPromise.then(function (item) {
-                            var element = document.createElement("div");
-                            element.className = "media-viewer-displaytemplate";
-                            element.innerHTML = item.data.innerHTML;
-                            element.addEventListener("click", function () {
-                                console.log("你点了", item.data);
+                            return myTemplate.render(item.data).then(function (element) {
+                                var element = document.createElement("div");
+                                element.className = "media-viewer-displaytemplate";
+                                element.innerHTML = item.data.innerHTML;
+                                currentE = element.querySelector("img, video, audio");
+                                try {
+                                    currentE.width = "";
+                                    currentE.height = "";
+                                } catch (e) { }
+                                var sizeChangeEvent = function (hWindow, hParent, node) {
+                                    var sw = 0,
+                                        sh = 0;
+                                    if (hParent) {
+                                        sw = hParent.offset.width || hParent.rect.width || hParent.client.width;
+                                        sh = hParent.offset.height || hParent.rect.height || hParent.client.height;
+                                    } else {
+                                        try {
+                                            try {
+                                                try {
+                                                    var rect = element.getBoundingClientRect();
+                                                    sw = rect.width;
+                                                    sh = rect.height;
+                                                } catch (e) {
+                                                    sw = element.offsetWidth;
+                                                    sh = element.offsetHeight;
+                                                }
+                                            } catch (e) {
+                                                sw = element.clientWidth;
+                                                sh = element.clientHeight;
+                                            }
+                                        } catch (e) {
+                                            currentE.style.width = "";
+                                            currentE.style.height = "";
+                                            currentE.style.top = "50%";
+                                            currentE.style.left = "50%";
+                                            currentE.style.transform = "translate(-50%, -50%)";
+                                        }
+                                    }
+                                    if (!sw || !sh) return;
+                                    var iw = 800, ih = 600;
+                                    var sra = sw / sh, ira = iw / ih;
+                                    if (NString.equals(currentE.tagName, "img")) {
+                                        iw = currentE.naturalWidth, ih = currentE.naturalHeight;
+                                        ira = iw / ih;
+                                    } else if (NString.equals(currentE.tagName, "video")) {
+                                        iw = currentE.videoWidth, ih = currentE.videoHeight;
+                                        ira = iw / ih;
+                                    } else {
+                                        currentE.style.left = "50%";
+                                        currentE.style.top = "50%";
+                                        currentE.style.transform = "translate(-50%, -50%)";
+                                    }
+                                    if (NString.equals(currentE.tagName, "img") || NString.equals(currentE.tagName, "video")) {
+                                        var nw = 0, nh = 0, nt = 0, nl = 0;
+                                        if (sra > ira) {
+                                            nh = sh;
+                                            nw = iw / ih * nh;
+                                        } else if (sra < ira) {
+                                            nw = sw;
+                                            nh = ih / iw * nw;
+                                        } else if (sra = ira) {
+                                            nw = sw;
+                                            nh = sh;
+                                        } else {
+                                            nh = sh;
+                                            nw = iw / ih * nh;
+                                        }
+                                        if (ira / sra > 3) {
+                                            // 认定过宽
+                                            if (ih > sh) nh = sh;
+                                            else nh = ih;
+                                            nw = iw / ih * nh;
+                                            nt = (sh - nh) * 0.5;
+                                            nl = 0;
+                                        }
+                                        if (sra / ira > 3) {
+                                            // 认定过长
+                                            if (iw > sw) nw = sw;
+                                            else nw = iw;
+                                            nh = ih / iw * nw;
+                                            nt = 0;
+                                            nl = (sw - nw) * 0.5;
+                                        }
+                                        nt = (sh - nh) * 0.5;
+                                        nl = (sw - nw) * 0.5;
+                                        if (nl < 0) nl = 0;
+                                        if (nt < 0) nt = 0;
+                                        currentE.style.left = (nl || 0) + "px" || "";
+                                        currentE.style.top = (nt || 0) + "px" || "";
+                                        currentE.style.width = nw + "px" || "";
+                                        currentE.style.height = nh + "px" || "";
+                                        try {
+                                            currentE.width = nw;
+                                            currentE.height = nh;
+                                        } catch (e) { }
+                                    }
+                                };
+                                registerSizeChangeEvent(currentE.parentNode, function (arg1, arg2, arg3)
+                                { sizeChangeEvent(arg1, arg2, arg3); });
+                                currentE.addEventListener("click", function () {
+                                    sizeChangeEvent();
+                                });
+                                element.style.width = "50%";
+                                element.style.height = "50%";
+                                setTimeout(function (hNode) {
+                                    if (hNode) {
+                                        hNode.style.width = "";
+                                        hNode.style.height = "";
+                                    }
+                                    sizeChangeEvent();
+                                }, 0, element);
+                                element.onload = sizeChangeEvent();
+                                currentE.addEventListener("load", function () {
+                                    sizeChangeEvent();
+                                });
+                                return element;
                             });
-                            return element;
                         });
                     };
                     for (var i = 0; i < displayEle.length; i++) {
@@ -225,7 +353,7 @@
                             WinJS.UI.Animation.fadeIn(flipshl);
                             for (var k = 0; k < datas.length; k++) {
                                 var data = datas.getAt(k);
-                                if (NString.equals (data.innerHTML, toStaticHTML(this.outerHTML))) {
+                                if (NString.equals(data.innerHTML, toStaticHTML(this.outerHTML))) {
                                     flipv.currentPage = k;
                                     break;
                                 }
