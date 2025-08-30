@@ -36,14 +36,11 @@
         </button>
         <div class="fullscreen-container" data-win-control="WinJS.UI.FlipView" id="media-flip-container" data-win-options="{ itemTemplate: select('#media-viewer-displaytemplate') }"></div>
     </div>
-    <!-- 
-        <div id="v_a_viewmenu" data-win-control="WinJS.UI.Menu">
-        <button data-win-control="WinJS.UI.MenuCommand" data-win-options="{label:'浏览', onclick: function(){alert('动作1')}}"></button>
-        <button data-win-control="WinJS.UI.MenuCommand" data-win-options="{label:'下载', onclick: function(){alert('动作2')}}"></button>
+    <div id="v_a_viewmenu" data-win-control="WinJS.UI.Menu">
+        <button id="menucmd-view" data-win-control="WinJS.UI.MenuCommand" data-win-options="{label:'查看', onclick: null}"></button>
+        <button id="menucmd-copy" data-win-control="WinJS.UI.MenuCommand" data-win-options="{label:'复制', onclick: null}"></button>
+        <button id="menucmd-download" data-win-control="WinJS.UI.MenuCommand" data-win-options="{label:'下载', onclick: null}"></button>
     </div>
-    <div id="media_optionmenu" data-win-control="WinJS.UI.Menu">
-        <button data-win-control="WinJS.UI.MenuCommand" data-win-options="{label:'下载', onclick: function(){alert('动作1')}}"></button>
-    </div>
-        -->
+    <a id="v_a_viewmenu_download" href="#" download style="display: none;"></a>
 </body>
 </html>

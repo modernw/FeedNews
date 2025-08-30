@@ -53,6 +53,75 @@
             return null;
         });
     }
+    function copyNodeContentToClipboard(element) {
+        if (!element) return;
+
+        var content = "";
+        var dataPackage = new Windows.ApplicationModel.DataTransfer.DataPackage();
+
+        if (NString.equals(element.tagName, "OBJECT")) {
+            content = element.data || "";
+            dataPackage.setText(content);
+
+        } else if (NString.equals(element.tagName, "VIDEO") || NString.equals(element.tagName, "AUDIO")) {
+            content = element.src || "";
+            dataPackage.setText(content);
+
+        } else if (NString.equals(element.tagName, "IMG")) {
+            try {
+                var canvas = document.createElement("canvas");
+                canvas.width = element.naturalWidth;
+                canvas.height = element.naturalHeight;
+                var ctx = canvas.getContext("2d");
+                ctx.drawImage(element, 0, 0);
+
+                canvas.toBlob(function (blob) {
+                    if (!blob) {
+                        console.error("无法获取图片 Blob，改为复制 URL");
+                        dataPackage.setText(element.src || "");
+                        Windows.ApplicationModel.DataTransfer.Clipboard.setContent(dataPackage);
+                        return;
+                    }
+
+                    // 保存文件到临时目录
+                    var fileName = "ClipboardImage_" + Date.now() + ".png";
+                    Windows.Storage.ApplicationData.current.temporaryFolder.createFileAsync(fileName,
+                        Windows.Storage.CreationCollisionOption.replaceExisting
+                    ).then(function (file) {
+                        return Windows.Storage.FileIO.writeBufferAsync(file, blob.msDetachStream());
+                    }).then(function () {
+                        return Windows.Storage.ApplicationData.current.temporaryFolder.getFileAsync(fileName);
+                    }).then(function (file) {
+                        dataPackage.setStorageItems([file]);
+                        Windows.ApplicationModel.DataTransfer.Clipboard.setContent(dataPackage);
+                        console.log("图片已保存并复制到剪贴板:", file.name);
+                    }).catch(function (err) {
+                        console.error("保存图片失败:", err);
+                        dataPackage.setText(element.src || "");
+                        Windows.ApplicationModel.DataTransfer.Clipboard.setContent(dataPackage);
+                    });
+                }, "image/png");
+
+                return; // 异步路径这里直接 return
+
+            } catch (e) {
+                console.error("复制图片失败:", e);
+                content = element.src || "";
+                dataPackage.setText(content);
+            }
+
+        } else {
+            content = element.innerText || element.textContent || "";
+            dataPackage.setText(content);
+        }
+
+        try {
+            Windows.ApplicationModel.DataTransfer.Clipboard.setContent(dataPackage);
+            console.log("已复制到剪贴板:", content);
+        } catch (e) {
+            console.error("设置剪贴板失败:", e);
+        }
+    }
     WinJS.UI.Pages.define("/pages/article/article.html", {
         // 每当用户导航至该页面时都要调用此函数。它
         // 使用应用程序的数据填充页面元素。
@@ -170,7 +239,6 @@
                         }
                         content.appendChild(webbutton);
                     }
-
                     var flipshl = document.getElementById("media-viewer");
                     flipshl.style.pointEvent = "none";
                     setTimeout(function () {
@@ -210,6 +278,8 @@
                     content.appendChild(clone);
                     flipv.itemDataSource = datas.dataSource;
                     var myTemplate = new WinJS.Binding.Template(document.querySelector(".media-viewer-displaytemplate"));
+                    var menuElement = document.getElementById("v_a_viewmenu");
+                    var menu = menuElement.winControl;
                     flipv.itemTemplate = function (itemPromise) {
                         return itemPromise.then(function (item) {
                             return myTemplate.render(item.data).then(function (element) {
@@ -308,11 +378,34 @@
                                             currentE.height = nh;
                                         } catch (e) { }
                                     }
+                                    if (NString.equals(currentE.tagName, "video")) {
+                                        currentE.style.left = 0;
+                                        currentE.style.top = 0;
+                                        currentE.style.width = "100%";
+                                        currentE.style.height = "100%";
+                                    }
                                 };
                                 registerSizeChangeEvent(currentE.parentNode, function (arg1, arg2, arg3)
                                 { sizeChangeEvent(arg1, arg2, arg3); });
                                 currentE.addEventListener("click", function () {
                                     sizeChangeEvent();
+                                });
+                                currentE.addEventListener("contextmenu", function (e) {
+                                    e.preventDefault();
+                                    var cmdView = document.body.querySelector("#v_a_viewmenu #menucmd-view");
+                                    var cmdDownload = document.body.querySelector("#v_a_viewmenu #menucmd-download");
+                                    cmdView.style.display = "none";
+                                    cmdView.disabled = true;
+                                    var aDownload = document.getElementById("v_a_viewmenu_download");
+                                    aDownload.href = this.src;
+                                    cmdDownload.onclick = function () {
+                                        aDownload.click();
+                                    }
+                                    var cmdCopy = document.body.querySelector("#v_a_viewmenu #menucmd-copy");
+                                    cmdCopy.onclick = function () {
+                                        copyNodeContentToClipboard(currentE);
+                                    }
+                                    menu.show(this, "right");
                                 });
                                 element.style.width = "50%";
                                 element.style.height = "50%";
@@ -344,6 +437,34 @@
                             md.type = MediaType.audio;
                         }
                         datas.push(md);
+                        imge.addEventListener("contextmenu", function (e) {
+                            e.preventDefault();
+                            var cmdView = document.body.querySelector("#v_a_viewmenu #menucmd-view");
+                            var cmdDownload = document.body.querySelector("#v_a_viewmenu #menucmd-download");
+                            var cmdCopy = document.body.querySelector("#v_a_viewmenu #menucmd-copy");
+                            cmdView.style.display = "";
+                            cmdView.disabled = false;
+                                cmdCopy.onclick = function () {
+                                    copyNodeContentToClipboard(imge);
+                                }
+                            var aDownload = document.getElementById("v_a_viewmenu_download");
+                            aDownload.href = this.src;
+                            cmdDownload.onclick = function () {
+                                aDownload.click();
+                            }
+                            cmdView.onclick = function () {
+                                flipshl.style.display = "";
+                                WinJS.UI.Animation.fadeIn(flipshl);
+                                for (var k = 0; k < datas.length; k++) {
+                                    var data = datas.getAt(k);
+                                    if (NString.equals(data.innerHTML, toStaticHTML(this.outerHTML))) {
+                                        flipv.currentPage = k;
+                                        break;
+                                    }
+                                }
+                            }
+                            menu.show(this, "right");
+                        });
                     }
                     var imgs = content.querySelectorAll("img");
                     for (var i = 0; i < imgs.length; i++) {
