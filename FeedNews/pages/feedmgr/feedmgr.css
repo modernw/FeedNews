@@ -1,32 +1,152 @@
 ﻿.feedmgr section {
-	margin: auto 120px;
+    margin: auto 0px;
+    padding: 0 120px;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 .phone .feedmgr .page-section {
-	margin: auto 24px;
+    margin: auto 0px;
+    padding: 0 24px;
 }
 
 .phone .feedmgr .page-header .titlearea {
-	-ms-grid-column: 1;
-	margin-top: 37px;
-	margin-left: 24px;
-	font-size: 28pt;
-	width: calc(100vw - 20px);
+    -ms-grid-column: 1;
+    margin-top: 37px;
+    margin-left: 24px;
+    font-size: 28pt;
+    width: calc(100vw - 20px);
 }
 
 .phone .feedmgr .back-button {
-	display: none;
+    display: none;
 }
 
 .fragment {
-	-ms-grid-columns: 1fr;
-	-ms-grid-rows: 128px 1fr;
-	display: -ms-grid;
-	height: 100%;
-	width: 100%;
+    -ms-grid-columns: 1fr;
+    -ms-grid-rows: 128px 1fr;
+    display: -ms-grid;
+    height: 100%;
+    width: 100%;
 }
 
-	.fragment section[role=main] {
-		-ms-grid-row: 2;
-		height: 100%;
-	}
+    .fragment section[role=main] {
+        -ms-grid-row: 2;
+        height: 100%;
+    }
+
+.feedmgr .manager-container {
+    min-width: 100%;
+    width: auto;
+    height: calc(100% - 10px * 3 - 1.3em);
+    /*
+        overflow-x: auto;
+        overflow-y: hidden;
+    */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: flex-start;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+    .feedmgr .manager-container .manager-block {
+        width: 350px;
+        min-width: 300px;
+        /* border: 2px solid rgba(0, 0, 0, 0.41); */
+        box-sizing: border-box;
+        height: 100%;
+    }
+
+    .feedmgr .manager-container .divide {
+        width: 30px;
+        min-width: 30px;
+        height: 100%;
+    }
+
+    .feedmgr .manager-container .manager-block .manager-list {
+        width: 100%;
+        height: calc(100% - 300px);
+        border: 2px solid rgba(0, 0, 0, 0.41);
+        box-sizing: border-box;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+        .feedmgr .manager-container .manager-block .manager-list .item {
+            text-align: left;
+            width: 100%;
+            min-height: 40px;
+            box-sizing: border-box;
+            color: black;
+            word-break: break-all;
+            height: auto;
+        }
+
+            .feedmgr .manager-container .manager-block .manager-list .item:hover {
+                background-color: rgba(0, 0, 0, 0.32);
+            }
+
+            .feedmgr .manager-container .manager-block .manager-list .item:active {
+                background-color: black;
+                color: white;
+                transform: none;
+            }
+
+            .feedmgr .manager-container .manager-block .manager-list .item:focus {
+                border-color: rgba(0, 0, 0, 0.39);
+            }
+
+            .feedmgr .manager-container .manager-block .manager-list .item.selected {
+                background-color: rgba(0, 127, 255, 0.37);
+            }
+
+                .feedmgr .manager-container .manager-block .manager-list .item.selected:hover {
+                    background-color: rgba(96, 163, 255, 0.71);
+                }
+
+                .feedmgr .manager-container .manager-block .manager-list .item.selected:active {
+                    color: rgb(96, 163, 255);
+                    background-color: white;
+                }
+
+            .feedmgr .manager-container .manager-block .manager-list .item * {
+                pointer-events: none;
+            }
+
+            .feedmgr .manager-container .manager-block .manager-list .item.selected * {
+                pointer-events: none;
+            }
+
+    .feedmgr .manager-container .manager-block .manager-command {
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-content: center;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .feedmgr .manager-container .manager-block .manager-command .win-command {
+            text-align: center;
+            width: 60px;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            align-content: center;
+            justify-content: center;
+            align-items: center;
+        }
+
+.template-msgbox table {
+    border-collapse: separate;      /* 必须 separate 才能使用 border-spacing */
+    border-spacing: 20px 0;         /* 列间距 20px，行间距 0 */
+    margin: 0;                      /* 去掉外边距 */
+}
+
+.template-msgbox table td {
+    padding: 0;                     /* 去掉单元格内部 padding，避免额外空隙 */
+}

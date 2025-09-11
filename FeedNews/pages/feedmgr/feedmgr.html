@@ -1,10 +1,19 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <title>feedmgr</title>
-
+    <link href="//Microsoft.WinJS.2.0/css/ui-dark.css" rel="stylesheet" />
+    <script src="//Microsoft.WinJS.2.0/js/base.js"></script>
+    <script src="//Microsoft.WinJS.2.0/js/ui.js"></script>
+    <script src="/js/public.js"></script>
+    <link href="/msgbox/msgbox.css" rel="stylesheet" />
+    <script src="/msgbox/msgbox.js"></script>
+    <script src="/js/tiletemplate.js"></script>
+    <script src="/js/locale.js"></script>
+    <script src="/js/feedmgr.js"></script>
+    <script src="/js/feed.js"></script>
     <link href="feedmgr.css" rel="stylesheet" />
     <script src="feedmgr.js"></script>
 </head>
@@ -13,12 +22,241 @@
         <header class="page-header" aria-label="Header content" role="banner">
             <button class="back-button" data-win-control="WinJS.UI.BackButton"></button>
             <h1 class="titlearea win-type-ellipsis">
-                <span class="pagetitle">欢迎使用 feedmgr</span>
+                <span class="pagetitle">Feed 源管理</span>
             </h1>
         </header>
         <section class="page-section" aria-label="Main content" role="main">
-            <p>此处显示内容。</p>
+            <p>在这里，您可以进行对源的增添、删除等操作。</p>
+            <div class="manager-container" id="feedmgr-html-blockcontainer">
+                <div class="manager-block" data-type="provider">
+                    <h2>提供者</h2>
+                    <div class="manager-list">
+                        <div class="item"><span>项 1 Item 1</span></div>
+                        <div class="item selected"><span>项 2 Item 2</span></div>
+                    </div>
+                    <p style="word-break: break-all;">当前选中的项：<span>(无)</span></p>
+                    <div class="manager-command">
+                        <button class="win-command add">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57609;</span></span>
+                            <span class="win-label">添加</span>
+                        </button>
+                        <button class="win-command edit">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57604;</span></span>
+                            <span class="win-label">编辑</span>
+                        </button>
+                        <button class="win-command delete">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57606;</span></span>
+                            <span class="win-label">删除</span>
+                        </button>
+                        <button class="win-command moveup">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57616;</span></span>
+                            <span class="win-label">上移</span>
+                        </button>
+                        <button class="win-command movedown">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57853;</span></span>
+                            <span class="win-label">下移</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="divide"></div>
+                <div class="manager-block" data-type="channel">
+                    <h2>频道</h2>
+                    <div class="manager-list"></div>
+                    <p style="word-break: break-all;">当前选中的项：<span>(无)</span></p>
+                    <div class="manager-command">
+                        <button class="win-command add">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57609;</span></span>
+                            <span class="win-label">添加</span>
+                        </button>
+                        <button class="win-command edit">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57604;</span></span>
+                            <span class="win-label">编辑</span>
+                        </button>
+                        <button class="win-command delete">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57606;</span></span>
+                            <span class="win-label">删除</span>
+                        </button>
+                        <button class="win-command moveup">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57616;</span></span>
+                            <span class="win-label">上移</span>
+                        </button>
+                        <button class="win-command movedown">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57853;</span></span>
+                            <span class="win-label">下移</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="divide"></div>
+                <div class="manager-block" data-type="category">
+                    <h2>分类</h2>
+                    <div class="manager-list"></div>
+                    <p style="word-break: break-all;">当前选中的项：<span>(无)</span></p>
+                    <div class="manager-command">
+                        <button class="win-command add">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57609;</span></span>
+                            <span class="win-label">添加</span>
+                        </button>
+                        <button class="win-command edit">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57604;</span></span>
+                            <span class="win-label">编辑</span>
+                        </button>
+                        <button class="win-command delete">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57606;</span></span>
+                            <span class="win-label">删除</span>
+                        </button>
+                        <button class="win-command moveup">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57616;</span></span>
+                            <span class="win-label">上移</span>
+                        </button>
+                        <button class="win-command movedown">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57853;</span></span>
+                            <span class="win-label">下移</span>
+                        </button>
+                    </div>
+                    <label for="category-updatemode" class="win-label">更新方式</label><br />
+                    <select id="category-updatemode" value="PrimaryCallback"></select>
+                    <div id="category-showintile" data-win-control="WinJS.UI.ToggleSwitch"
+                         data-win-options="{title:'显示在磁贴上', checked:true}"></div>
+                </div>
+                <div class="divide"></div>
+                <div class="manager-block" data-type="source">
+                    <h2>来源</h2>
+                    <div class="manager-list" style="height: calc(100% - 540px);"></div>
+                    <p style="word-break: break-all;">当前选中的项：<span>(无)</span></p>
+                    <div class="manager-command">
+                        <button class="win-command add">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57609;</span></span>
+                            <span class="win-label">添加</span>
+                        </button>
+                        <button class="win-command edit">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57604;</span></span>
+                            <span class="win-label">编辑</span>
+                        </button>
+                        <button class="win-command delete">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57606;</span></span>
+                            <span class="win-label">删除</span>
+                        </button>
+                        <button class="win-command moveup">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57616;</span></span>
+                            <span class="win-label">上移</span>
+                        </button>
+                        <button class="win-command movedown">
+                            <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57853;</span></span>
+                            <span class="win-label">下移</span>
+                        </button>
+                    </div>
+                    <label for="source-imagereplacerule">图片链接修正原则</label>
+                    <div>
+                        <label for="source-irr-src">用于提取的正则</label>
+                        <input type="text" placeholder="用于提取的正则" id="source-irr-src" /><br />
+                        <label for="source-irr-medium" class="win-label">中磁贴</label><br />
+                        <input type="text" placeholder="用于替换的部分" id="source-irr-medium-rep" /><br />
+                        <label for="source-irr-wide" class="win-label">宽磁贴</label><br />
+                        <input type="text" placeholder="用于替换的部分" id="source-irr-wide-rep" /><br />
+                        <label for="source-irr-large" class="win-label">大磁贴</label><br />
+                        <input type="text" placeholder="用于替换的部分" id="source-irr-large-rep" />
+                    </div>
+                </div>
+            </div>
         </section>
+        <div id="provider_channel_create_edit" style="display: none;">
+            <p id="description">现在我们要添加/修改提供者/频道的信息。</p>
+            <table>
+                <tbody>
+                    <tr>
+                        <td data-win-res="{textContent: '/resources/FeedManager.Item.ID'}"></td>
+                        <td><input type="text" id="id-input" /></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td data-win-res="{textContent: '/resources/FeedManager.Item.DisplayName'}"></td>
+                        <td><input type="text" id="display-name-input" /></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="category_create_edit" style="display: none;">
+            <p id="description">现在我们要添加/修改分类信息。</p>
+            <table>
+                <tbody>
+                    <tr>
+                        <td data-win-res="{textContent: '/resources/FeedManager.Item.ID'}"></td>
+                        <td><input type="text" id="id-input" /></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td data-win-res="{textContent: '/resources/FeedManager.Item.DisplayName'}"></td>
+                        <td><input type="text" id="display-name-input" /></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td data-win-res="{textContent: '/resources/FeedManager.Item.UpdateMode'}"></td>
+                        <td><select id="update-mode-input" value="PrimaryCallback"></select></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><div id="show-in-tile-input"></div></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="source_create_edit" style="display: none; width: 100%;">
+            <p id="description">现在我们要添加/修改源信息。</p>
+            <table>
+                <tbody>
+                    <tr>
+                        <td data-win-res="{textContent: '/resources/FeedManager.Item.URL'}"></td>
+                        <td><input type="text" id="url-input" /></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td data-win-res="{textContent: '/resources/FeedManager.Item.ImageRule.Title'}" colspan="3" style="font-weight: bold;"></td>
+                    </tr>
+                    <tr>
+                        <td data-win-res="{textContent: '/resources/FeedManager.Item.ImageRule.Source'}"></td>
+                        <td><input type="text" id="image-src-input" /></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td data-win-res="{textContent: '/resources/FeedManager.Item.ImageRule.Replace'}" colspan="2"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Medium'}"></td>
+                        <td><input type="text" id="image-rep-medium-input" /></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Wide'}"></td>
+                        <td><input type="text" id="image-rep-wide-input" /></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Large'}"></td>
+                        <td><input type="text" id="image-rep-large-input" /></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div>
+                <button data-win-res="{textContent: '/resources/FeedManager.Item.ImageRule.Test'}" id="test-command"></button>
+            </div>
+            <div style="width: 100%;">
+                <p><span data-win-res="{textContent: '/resources/FeedManager.Item.Result'}"></span>: </p>
+                <p><span data-win-res="{textContent: '/resources/FeedManager.Item.Status'}"></span>: <span id="status-result"></span></p>
+                <p><span data-win-res="{textContent: '/resources/FeedManager.Source.Title'}"></span>: <span id="url-src"></span></p>
+                <span data-win-res="{textContent: '/resources/FeedManager.Item.ImageRule.Result'}"></span><span>: </span>
+                <div style="width: 100%;">
+                    <div style="width: 100%; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: flex-start; overflow: auto hidden;">
+                        <div><span data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Medium'}"></span>: <span id="rep-medium"></span><br /><img src="/images/blank/imagePlacehold150.png" width="150" height="150" /></div>
+                        <div><span data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Wide'}"></span>: <span id="rep-wide"></span><br /><img src="/images/blank/imagePlacehold310x150.png" width="310" height="150" /></div>
+                        <div><span data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Large'}"></span>: <span id="rep-large"></span><br /><img src="/images/blank/imagePlacehold310.png" width="310" height="310" /></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

@@ -9,6 +9,16 @@
     var sched = WinJS.Utilities.Scheduler;
     var ui = WinJS.UI;
 
+    WinJS.Application.onsettings = function (e) {
+        e.detail.applicationcommands = {
+            "feedmgr": {
+                title: "Feed 源管理",
+                href: "/pages/settings/feedsrc/feedsrc.html"
+            }
+        };
+        WinJS.UI.SettingsFlyout.populateSettings(e);
+    };
+
     app.addEventListener("activated", function (args) {
         if (args.detail.kind === activation.ActivationKind.launch) {
             if (args.detail.previousExecutionState !== activation.ApplicationExecutionState.terminated) {

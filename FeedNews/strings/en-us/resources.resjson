@@ -1,0 +1,17 @@
+﻿// 有关本地化 Windows 应用程序的详细信息，请参阅: http://go.microsoft.com/fwlink/?LinkId=212836
+
+{
+    "MessageBox.OK": "OK",
+	"MessageBox.Cancel": "Cancel",
+	"MessageBox.Abort": "Abort",
+	"MessageBox.Retry": "Retry",
+	"MessageBox.Ignore": "Ignore",
+	"MessageBox.Yes": "Yes",
+	"MessageBox.No": "No",
+	"MessageBox.Close": "Close",
+	"MessageBox.Help": "Help",
+	"MessageBox.TryAgain": "Try Again",
+	"MessageBox.Continue": "Continue",
+	"App.AppTitle" :"Feed News",
+	"App.AppDescription" :"Feed News helps you to subscribe the feeds, and can display on tile."
+}

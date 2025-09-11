@@ -1,0 +1,16 @@
+﻿// 有关本地化 Windows 应用程序的详细信息，请参阅: http://go.microsoft.com/fwlink/?LinkId=212836
+{
+    "MessageBox.OK": "確定",
+    "MessageBox.Cancel": "取消",
+    "MessageBox.Abort": "中止",
+    "MessageBox.Retry": "重試",
+    "MessageBox.Ignore": "忽略",
+    "MessageBox.Yes": "是",
+    "MessageBox.No": "否",
+    "MessageBox.Close": "關閉",
+    "MessageBox.Help": "幫助",
+    "MessageBox.TryAgain": "重試",
+    "MessageBox.Continue": "繼續",
+	"App.AppTitle" :"Feed News",
+	"App.AppDescription" :"Feed News 協助您訂閱來源，並能顯示在動態磚上。"
+}

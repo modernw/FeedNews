@@ -482,6 +482,8 @@
                         });
                     }
                 });
+            }).then (function () {
+                WinJS.Resources.processAll();
             });
             // TODO: 在此处初始化页面。
         },

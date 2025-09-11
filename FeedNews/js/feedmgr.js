@@ -24,7 +24,6 @@
     function Source(swUrl) {
         this.url = NString.trim (swUrl || "");
         this.imageRules = []; // ImageReplaceRule[]
-        this.showInTile = true;
     }
 
     function Category(swId, swName) {
@@ -32,6 +31,7 @@
         this.displayName = NString.trim (swName || "");
         this.updateStrategy = FeedUpdateStrategy.PrimaryFallback;
         this.sources = []; // Source[]
+        this.showInTile = true;
     }
 
     Category.prototype.getUrlList = function (bGetForTile) {
@@ -125,7 +125,7 @@
     };
 
     FeedManager.prototype.setProviderDisplayName = function (swId, swDisplayName) {
-        if (NString.empty(swName)) throw "错误：Provider 的显示名不能为空";
+        if (NString.empty(swDisplayName)) throw "错误：Provider 的显示名不能为空";
         _findById(this.providers, swId).displayName = NString.trim(swDisplayName);
     }
 
@@ -180,13 +180,14 @@
     };
 
     // ===== API：Category 操作 =====
-    FeedManager.prototype.addCategory = function (swProviderId, swChannelId, swId, swName, swUpdateMode) {
+    FeedManager.prototype.addCategory = function (swProviderId, swChannelId, swId, swName, swUpdateMode, bShowInTile) {
         var oChannel = this.getChannel(swProviderId, swChannelId);
         if (!oChannel) return null;
         var oCategory = new Category(swId, swName);
         if (!swUpdateMode) {
             swUpdateMode = FeedUpdateStrategy.PrimaryFallback;
         }
+        if (bShowInTile === null || bShowInTile === undefined) { bShowInTile = true; }
         switch (swUpdateMode) {
             case FeedUpdateStrategy.FullMergeWithTagging:
             case FeedUpdateStrategy.MergeByContentHash:
@@ -199,6 +200,7 @@
             default: throw "错误：错误的更新类型"; break;
         }
         oCategory.updateStrategy = swUpdateMode;
+        oCategory.showInTile = bShowInTile;
         oChannel.categories.push(oCategory);
         return oCategory;
     };
@@ -263,6 +265,13 @@
         _findById(oChannel.categories, swId).updateStrategy = swUpdateMode;
     };
 
+    FeedManager.prototype.setCategoryShowInTile = function (swProviderId, swChannelId, swId, bIsShowInTile) {
+        var oChannel = this.getChannel(swProviderId, swChannelId);
+        if (!oChannel) return null;
+        if (bIsShowInTile === null || bIsShowInTile === undefined) throw "错误：必须要设置 true 或 false 这样的逻辑值。";
+        _findById(oChannel.categories, swId).showInTile = bIsShowInTile;
+    };
+
     FeedManager.prototype.moveCategoryUp = function (swProviderId, swChannelId, swId) {
         var oChannel = this.getChannel(swProviderId, swChannelId);
         if (oChannel) _moveItem(oChannel.categories, swId, -1, false);
@@ -274,13 +283,11 @@
     };
 
     // ===== API：Source 操作 =====
-    FeedManager.prototype.addSource = function (swProviderId, swChannelId, swCategoryId, swUrl, bShowInTile) {
+    FeedManager.prototype.addSource = function (swProviderId, swChannelId, swCategoryId, swUrl) {
         var oCategory = this.getCategory(swProviderId, swChannelId, swCategoryId);
-        if (bShowInTile === null || bShowInTile === undefined) { bShowInTile = true; }
         if (NString.empty (swUrl) || NString.trim (swUrl).length < 2) throw "错误：Url 不能小于最短长度";
         if (!oCategory) return null;
         var oSource = new Source(NString.trim (swUrl));
-        oSource.showInTile = bShowInTile;
         oCategory.sources.push(oSource);
         return oSource;
     };
@@ -375,8 +382,9 @@
 
     FeedManager.prototype.update = function (swFileName) {
         if (!swFileName) swFileName = FEEDMGR_STORAGE_FILEPATH;
-        this.save(swFileName);
-        this.load(swFileName);
+        return this.save(swFileName).then(function () {
+            this.load(swFileName);
+        });
     };
 
     // ===== 暴露全局单例 =====

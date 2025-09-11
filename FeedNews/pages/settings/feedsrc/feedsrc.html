@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="//Microsoft.WinJS.2.0/css/ui-light.css" rel="stylesheet" />
+    <script src="//Microsoft.WinJS.2.0/js/base.js"></script>
+    <script src="//Microsoft.WinJS.2.0/js/ui.js"></script>
+    <link href="feedsrc.css" rel="stylesheet" />
+    <script src="feedsrc.js"></script>
+</head>
+<body>
+    <div id="settingsContainer"
+         data-win-control="WinJS.UI.SettingsFlyout"
+         data-win-options="{settingsCommandId:'rsssettings', width:'normal'}"
+         class="win-settingsflyout">
+        <div class="win-header win-ui-dark" style="background-color: #70E1FF;">
+            <button class="win-backbutton back-button" type="button" onclick="WinJS.UI.SettingsFlyout.show()"></button>
+            <div class="win-label" data-win-res="{textContent:'/resources/Settings_RSS_Title'}"></div>
+        </div>
+        <div class="win-content" style="overflow-x: hidden; overflow-y: auto;">
+            <div class="win-settings-section" style="box-sizing: border-box;">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

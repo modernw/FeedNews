@@ -143,7 +143,7 @@
     top: 0px;
     left: 0px;
     overflow: auto;
-    background-image: linear-gradient(to right, rgba(0, 210, 125, 0.25), rgba(0, 133, 255, 0.20));
+    /* background-image: linear-gradient(to right, rgba(0, 210, 125, 0.25), rgba(0, 133, 255, 0.20)); */
     display: flex;
 }
 

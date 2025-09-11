@@ -300,7 +300,7 @@
             return strUrl;
         }
         this.title = cArticle.title || "";
-        this.author = cArticle.author || cChannel.title || "";
+        this.author = cArticle.author || "";
         this.channel = cChannel.title || "";
         this.pubdate = cArticle.pubdate || null;
         this.cover = cArticle.cover;
@@ -318,7 +318,7 @@
                 title: this.title,
                 author: this.author,
                 channel: this.channel,
-                pubdate: this.pubdate ? new Date (this.pubdate).toLocaleString() : "",
+                pubdate: this.pubdate ? new Date(this.pubdate).toLocaleString() : "",
                 cover: "url('" + this.cover + "')",
                 url: this.url
             };
@@ -326,6 +326,9 @@
     }
     var listViewEl = null;
     var data = new WinJS.Binding.List([]);
+    var providerData = new WinJS.Binding.List([]),
+        channelData = new WinJS.Binding.List([]),
+        categoryData = new WinJS.Binding.List([]);
     var lastBlock = {
         provider: "",
         channel: "",
@@ -348,7 +351,7 @@
         }
         try { return getTime(cDateLeft) - getTime(cDateRight); } catch (e) { return 0; }
     }
-    function fabs (value) {
+    function fabs(value) {
         return value >= 0 ? value : -value;
     }
     function getCache(swProvider, swChannel, swCategory) {
@@ -478,60 +481,12 @@
         node.tabIndex = 0;
         var span = document.createElement("span");
         span.style.pointerEvents = "none";
-        var radio = document.createElement("input");
-        radio.type = "radio";
-        radio.name = swNameSpace;
         node.id = NString.normalize(swNameSpace) + NString.normalize(swId);
         node.dataset.id = NString.normalize(swId);
         node.dataset.ns = NString.normalize(swNameSpace);
         node.classList.add("item");
         node.appendChild(span);
         span.textContent = swDisplayName;
-        node.appendChild(radio);
-        radio.style.display = "none";
-        node.addEventListener("click", function () {
-            var down = document.createEvent("MouseEvent");
-            down.initMouseEvent("mousedown", true, true, window, 1, 0, 0, 0, 0,
-                false, false, false, false, 0, null);
-            radio.dispatchEvent(down);
-            var up = document.createEvent("MouseEvent");
-            up.initMouseEvent("mouseup", true, true, window, 1, 0, 0, 0, 0,
-                false, false, false, false, 0, null);
-            radio.dispatchEvent(up);
-            var click = document.createEvent("MouseEvent");
-            click.initMouseEvent("click", true, true, window, 1, 0, 0, 0, 0,
-                false, false, false, false, 0, null);
-            radio.dispatchEvent(click);
-        });
-        radio.addEventListener("change", function () {
-            if (this.checked === true) {
-                if (!node.classList.contains("selected")) { node.classList.add("selected"); }
-                var nowdata = {
-                    provider: settings.values["nowProvider"],
-                    channel: settings.values["nowChannel"],
-                    category: settings.values["nowCategory"]
-                };
-                switch (node.dataset.ns) {
-                    case ITEM_NAMESPACE.provider: {
-                        settings.values["nowProvider"] = node.dataset.id;
-                        if (nowdata.provider && nowdata.channel && nowdata.category)
-                            updateFeeds(nowdata.provider, nowdata.channel, nowdata.category);
-                    } break;
-                    case ITEM_NAMESPACE.channel: {
-                        settings.values["nowChannel"] = node.dataset.id;
-                        if (nowdata.provider && nowdata.channel && nowdata.category)
-                            updateFeeds(nowdata.provider, nowdata.channel, nowdata.category);
-                    } break;
-                    case ITEM_NAMESPACE.category: {
-                        settings.values["nowCategory"] = node.dataset.id;
-                        if (nowdata.provider && nowdata.channel && nowdata.category)
-                            updateFeeds(nowdata.provider, nowdata.channel, nowdata.category);
-                    } break;
-                }
-            } else {
-                if (node.classList.contains("selected")) { node.classList.remove("selected"); }
-            }
-        });
         return node;
     }
     function initFeedList() {
@@ -549,234 +504,1306 @@
                 category: settings.values["nowCategory"]
             };
             var datas = FeedManager.datas();
-            var itemChannelChangeFunction = function (swId) {
-                FeedManager.load().done(function (complete) {
-                    channel.innerHTML = "";
-                    var nowdata = {
-                        provider: settings.values["nowProvider"],
-                        channel: settings.values["nowChannel"],
-                        category: settings.values["nowCategory"]
-                    };
-                    var datas = FeedManager.datas();
-                    for (var i = 0; datas.providers && i < datas.providers.length; i++) {
-                        var p = datas.providers[i];
-                        if (NString.equals(swId, p.id)) {
-                            var cs = p.channels;
-                            for (var j = 0; cs && j < cs.length; j++) {
-                                var c = cs[j];
-                                var itemNode = createItem(c.id, c.displayName, ITEM_NAMESPACE.channel);
-                                itemNode.addEventListener("click", function () {
-                                    var nodes = channel.querySelectorAll(".item");
-                                    for (var cnt = 0; cnt < nodes.length; cnt++) {
-                                        var node = nodes[cnt];
-                                        settings.values["nowChannel"] = this.dataset.id;
-                                        var radio = node.querySelector("input");
-                                        if (radio.checked) {
-                                            if (!node.classList.contains("selected")) {
-                                                node.classList.add("selected");
-                                            }
-                                            itemCategoryChangeFunction(p.id, c.id);
-                                        } else {
-                                            if (node.classList.contains("selected")) { node.classList.remove("selected"); }
-                                        }
-                                    }
-                                });
-                                channel.appendChild(itemNode);
-                                WinJS.UI.Animation.createAddToListAnimation(itemNode, channel).execute();
-                                if (NString.equals(c.id, nowdata.channel)) { itemNode.click(); }
+            function initCategoryItems() {
+                category.innerHTML = "";
+                var nowdata = {
+                    provider: settings.values["nowProvider"],
+                    channel: settings.values["nowChannel"],
+                    category: settings.values["nowCategory"]
+                };
+                var categories = FeedManager.getChannel(settings.values["nowProvider"], settings.values["nowChannel"]).categories;
+                var nowCategory = settings.values["nowCategory"];
+                for (var i = 0; i < categories.length; i++) {
+                    var sc = categories[i];
+                    var cnode = createItem(sc.id, sc.displayName, ITEM_NAMESPACE.category);
+                    cnode.classList.add("light");
+                    category.appendChild(cnode);
+                    WinJS.UI.Animation.createAddToListAnimation(cnode, category).execute();
+                    cnode.addEventListener("click", function (event) {
+                        var isselected = this.classList.contains("selected");
+                        if (!isselected) {
+                            var categoryitems = category.querySelectorAll(".item");
+                            for (var j = 0; j < categoryitems.length; j++) {
+                                categoryitems[j].classList.remove("selected");
                             }
-                            if (!channel.querySelectorAll(".selected").length) {
-                                var items = channel.querySelector(".item");
-                                if (items) items.click();
-                            }
-                            break;
+                            this.classList.add("selected");
+                            settings.values["nowCategory"] = this.dataset.id;
+                            updateFeeds(nowdata.provider, nowdata.channel, nowdata.category);
                         }
-                    }
-                });
-            }
-            var itemCategoryChangeFunction = function (swPid, swCid) {
-                FeedManager.load().done(function (complete) {
-                    category.innerHTML = "";
-                    var nowdata = {
-                        provider: settings.values["nowProvider"],
-                        channel: settings.values["nowChannel"],
-                        category: settings.values["nowCategory"]
-                    };
-                    var datas = FeedManager.datas();
-                    for (var i = 0; datas.providers && i < datas.providers.length; i++) {
-                        var p = datas.providers[i];
-                        if (NString.equals(swPid, p.id)) {
-                            var cs = p.channels;
-                            for (var j = 0; cs && j < cs.length; j++) {
-                                var c = cs[j];
-                                if (NString.equals(swCid, c.id)) {
-                                    var cas = c.categories;
-                                    for (var k = 0; cas && k < cas.length; k++) {
-                                        var ca = cas[k];
-                                        var itemNode = createItem(ca.id, ca.displayName, ITEM_NAMESPACE.category);
-                                        itemNode.classList.add("light");
-                                        itemNode.addEventListener("click", function () {
-                                            var nodes = category.querySelectorAll(".item");
-                                            settings.values["nowCategory"] = this.dataset.id;
-                                            for (var cnt = 0; cnt < nodes.length; cnt++) {
-                                                var node = nodes[cnt];
-                                                var radio = node.querySelector("input");
-                                                if (radio.checked) {
-                                                    if (!node.classList.contains("selected")) { node.classList.add("selected"); }
-                                                } else {
-                                                    if (node.classList.contains("selected")) { node.classList.remove("selected"); }
-                                                }
-                                            }
-                                        });
-                                        category.appendChild(itemNode);
-                                        WinJS.UI.Animation.createAddToListAnimation(itemNode, category).execute();
-                                        if (NString.equals(ca.id, nowdata.category)) { itemNode.click(); }
-                                    }
-                                    if (!category.querySelectorAll(".selected").length) {
-                                        var items = category.querySelector(".item");
-                                        if (items) items.click();
-                                    }
-                                    break;
-                                }
-                            }
+                        if (this.disabled === true) {
+                            this.classList.remove("selected");
                         }
-                    }
-                });
-            };
-            try {
-                if (datas.providers !== null && datas.providers !== undefined && datas.providers) {
-                    for (var i = 0; datas.providers && i < datas.providers.length; i++) {
-                        var p = datas.providers[i];
-                        var itemNode = createItem(p.id, p.displayName, ITEM_NAMESPACE.provider);
-                        itemNode.addEventListener("click", function () {
-                            var nodes = provider.querySelectorAll(".item");
-                            settings.values["nowProvider"] = this.dataset.id;
-                            for (var cnt = 0; cnt < nodes.length; cnt++) {
-                                var node = nodes[cnt];
-                                var radio = node.querySelector("input");
-                                if (radio.checked) {
-                                    if (!node.classList.contains("selected")) { node.classList.add("selected"); }
-                                    itemChannelChangeFunction(this.dataset.id);
-                                } else {
-                                    if (node.classList.contains("selected")) { node.classList.remove("selected"); }
-                                }
-                            }
-                        });
-                        provider.appendChild(itemNode);
-                        WinJS.UI.Animation.createAddToListAnimation(itemNode, provider).execute();
-                        if (NString.equals(p.id, nowdata.provider)) { itemNode.click(); }
-                    }
-                    if (!provider.querySelectorAll(".selected").length) {
-                        var items = provider.querySelector(".item");
-                        if (items) items.click();
+                    });
+                    if (NString.equals(nowCategory, sc.id)) {
+                        cnode.click();
                     }
                 }
-            } catch (e) {  }
+                var nowSelected = category.querySelector(".selected");
+                if (!nowSelected) {
+                    var firstNode = category.querySelector(".item");
+                    if (firstNode) firstNode.click();
+                }
+            }
+            function initChannelItems() {
+                channel.innerHTML = "";
+                var channels = FeedManager.getProvider(settings.values["nowProvider"]).channels;
+                var nowChannel = settings.values["nowChannel"];
+                for (var i = 0; i < channels.length; i++) {
+                    var sp = channels[i];
+                    var cnode = createItem(sp.id, sp.displayName, ITEM_NAMESPACE.channel);
+                    channel.appendChild(cnode);
+                    WinJS.UI.Animation.createAddToListAnimation(cnode, channel).execute();
+                    cnode.addEventListener("click", function (event) {
+                        var isselected = this.classList.contains("selected");
+                        if (!isselected) {
+                            var channelitems = channel.querySelectorAll(".item");
+                            for (var j = 0; j < channelitems.length; j++) {
+                                channelitems[j].classList.remove("selected");
+                            }
+                            this.classList.add("selected");
+                            settings.values["nowChannel"] = this.dataset.id;
+                            initCategoryItems();
+                        }
+                        if (this.disabled === true) {
+                            this.classList.remove("selected");
+                        }
+                    });
+                    if (NString.equals(nowChannel, sp.id)) {
+                        cnode.click();
+                    }
+                }
+                var nowSelected = channel.querySelector(".selected");
+                if (!nowSelected) {
+                    var firstNode = channel.querySelector(".item");
+                    if (firstNode) firstNode.click();
+                }
+            }
+            try {
+                if (datas.providers !== null && datas.providers !== undefined && datas.providers) {
+                    var nowProvider = settings.values["nowProvider"];
+                    for (var i = 0; i < datas.providers.length; i++) {
+                        var sp = datas.providers[i];
+                        var pnode = createItem(sp.id, sp.displayName, ITEM_NAMESPACE.provider);
+                        provider.appendChild(pnode);
+                        WinJS.UI.Animation.createAddToListAnimation(pnode, provider).execute();
+                        pnode.addEventListener("click", function (event) {
+                            var isselected = this.classList.contains("selected");
+                            if (!isselected) {
+                                var provideritems = provider.querySelectorAll(".item");
+                                for (var j = 0; j < provideritems.length; j++) {
+                                    provideritems[j].classList.remove("selected");
+                                }
+                                this.classList.add("selected");
+                                settings.values["nowProvider"] = this.dataset.id;
+                                initChannelItems();
+                            }
+                            if (this.disabled === true) {
+                                this.classList.remove("selected");
+                            }
+                        });
+                        if (NString.equals(nowProvider, sp.id)) {
+                            pnode.click();
+                        }
+                    }
+                    var nowSelected = provider.querySelector(".selected");
+                    if (!nowSelected) {
+                        var firstNode = provider.querySelector(".item");
+                        if (firstNode) firstNode.click();
+                    }
+                }
+            } catch (e) { }
         });
+    }
+    function initExampleData() {
+        var providers = {
+            ithome: {
+                display: "IT 之家",
+                channels: {
+                    aoffical: {
+                        display: "主页",
+                        categorys: {
+                            news: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://www.ithome.com/rss/"
+                                ]
+                            }
+                        }
+                    },
+                    ranking: {
+                        display: "热榜",
+                        categorys: {
+                            hours24: {
+                                display: "24 小时阅读榜",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/ithome/ranking/24h",
+                                    "https://rsshub.app/ithome/ranking/24h"
+                                ]
+                            },
+                            days7: {
+                                display: "7 天最热",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/ithome/ranking/7days",
+                                    "https://rsshub.app/ithome/ranking/7days"
+                                ]
+                            },
+                            monthly: {
+                                display: "月榜",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/ithome/ranking/monthly",
+                                    "https://rsshub.app/ithome/ranking/monthly"
+                                ]
+                            }
+                        },
+                    },
+                    it: {
+                        display: "IT 资讯",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/ithome/it",
+                                    "https://rsshub.app/ithome/it"
+                                ]
+                            }
+                        }
+                    },
+                    soft: {
+                        display: "软件之家",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/ithome/soft",
+                                    "https://rsshub.app/ithome/soft"
+                                ]
+                            }
+                        }
+                    },
+                    win10: {
+                        display: "Win10 之家",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/ithome/win10",
+                                    "https://rsshub.app/ithome/win10"
+                                ]
+                            }
+                        }
+                    },
+                    win11: {
+                        display: "Win11 之家",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/ithome/win11",
+                                    "https://rsshub.app/ithome/win11"
+                                ]
+                            }
+                        }
+                    },
+                    iphone: {
+                        display: "iPhone 之家",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/ithome/iphone",
+                                    "https://rsshub.app/ithome/iphone"
+                                ]
+                            }
+                        }
+                    },
+                    ipad: {
+                        display: "iPad 之家",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/ithome/ipad",
+                                    "https://rsshub.app/ithome/ipad"
+                                ]
+                            }
+                        }
+                    },
+                    android: {
+                        display: "Android 之家",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/ithome/android",
+                                    "https://rsshub.app/ithome/android"
+                                ]
+                            }
+                        }
+                    },
+                    digi: {
+                        display: "数码之家",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/ithome/digi",
+                                    "https://rsshub.app/ithome/digi"
+                                ]
+                            }
+                        }
+                    },
+                    next: {
+                        display: "智能时代",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/ithome/next",
+                                    "https://rsshub.app/ithome/next"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            people: {
+                display: "人民网",
+                channels: {
+                    headlines: {
+                        display: "首页头条",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                        "https://rsshub.rssforever.com/people",
+                        "https://rsshub.app/people"
+                                ]
+                            },
+                            offical: {
+                                display: "要问快讯（官方）",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "http://www.people.com.cn/rss/ywkx.xml"
+                                ]
+                            }
+                        }
+                    },
+                    politics: {
+                        display: "时政频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/politics.xml"]
+                            }
+                        }
+                    },
+                    world: {
+                        display: "国际频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/world.xml"]
+                            }
+                        }
+                    },
+                    finance: {
+                        display: "财政频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/finance.xml"]
+                            }
+                        }
+                    },
+                    money: {
+                        display: "金融频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/money.xml"]
+                            }
+                        }
+                    },
+                    energy: {
+                        display: "能源频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/energy.xml"]
+                            }
+                        }
+                    },
+                    ccnews: {
+                        display: "央企频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/ccnews.xml"]
+                            }
+                        }
+                    },
+                    sports: {
+                        display: "体育频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/sports.xml"]
+                            }
+                        }
+                    },
+                    legal: {
+                        display: "法制频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/legal.xml"]
+                            }
+                        }
+                    },
+                    edu: {
+                        display: "教育频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/edu.xml"]
+                            }
+                        }
+                    },
+                    culture: {
+                        display: "文化频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/culture.xml"]
+                            }
+                        }
+                    },
+                    society: {
+                        display: "社会频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/society.xml"]
+                            }
+                        }
+                    },
+                    media: {
+                        display: "传媒频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/media.xml"]
+                            }
+                        }
+                    },
+                    theory: {
+                        display: "理论频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/theory.xml"]
+                            }
+                        }
+                    },
+                    ent: {
+                        display: "娱乐频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/ent.xml"]
+                            }
+                        }
+                    },
+                    opinion: {
+                        display: "观点频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/opinion.xml"]
+                            }
+                        }
+                    },
+                    auto: {
+                        display: "汽车频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/auto.xml"]
+                            }
+                        }
+                    },
+                    haixia: {
+                        display: "海峡两岸",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/haixia.xml"]
+                            }
+                        }
+                    },
+                    it: {
+                        display: "IT 频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/it.xml"]
+                            }
+                        }
+                    },
+                    env: {
+                        display: "环保频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/env.xml"]
+                            }
+                        }
+                    },
+                    gongyi: {
+                        display: "公益频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/gongyi.xml"]
+                            }
+                        }
+                    },
+                    caipiao: {
+                        display: "彩票频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/caipiao.xml"]
+                            }
+                        }
+                    },
+                    scitech: {
+                        display: "科技频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/scitech.xml"]
+                            }
+                        }
+                    },
+                    history: {
+                        display: "文史频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/history.xml"]
+                            }
+                        }
+                    },
+                    art: {
+                        display: "收藏频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/art.xml"]
+                            }
+                        }
+                    },
+                    book: {
+                        display: "读书频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/book.xml"]
+                            }
+                        }
+                    },
+                    shipin: {
+                        display: "食品频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/shipin.xml"]
+                            }
+                        }
+                    },
+                    game: {
+                        display: "游戏频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/game.xml"]
+                            }
+                        }
+                    },
+                    homea: {
+                        display: "家电频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/homea.xml"]
+                            }
+                        }
+                    },
+                    house: {
+                        display: "房产频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/house.xml"]
+                            }
+                        }
+                    },
+                    health: {
+                        display: "健康频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/health.xml"]
+                            }
+                        }
+                    },
+                    ip: {
+                        display: "知识产权",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/ip.xml"]
+                            }
+                        }
+                    },
+                    cpc: {
+                        display: "共产党新闻网",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/cpc.xml"]
+                            }
+                        }
+                    },
+                    dangjian: {
+                        display: "党建",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/dangjian.xml"]
+                            }
+                        }
+                    },
+                    dangshi: {
+                        display: "党史",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/dangshi.xml"]
+                            }
+                        }
+                    },
+                    npc: {
+                        display: "中国人大新闻",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/npc.xml"]
+                            }
+                        }
+                    },
+                    cppcc: {
+                        display: "中国政协新闻",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/cppcc.xml"]
+                            }
+                        }
+                    },
+                    military: {
+                        display: "军事频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/military.xml"]
+                            }
+                        }
+                    },
+                    tv: {
+                        display: "人民电视",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/tv.xml"]
+                            }
+                        }
+                    },
+                    unn: {
+                        display: "地方频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/unn.xml"]
+                            }
+                        }
+                    },
+                    travel: {
+                        display: "旅游频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/travel.xml"]
+                            }
+                        }
+                    },
+                    renshi: {
+                        display: "人事频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/renshi.xml"]
+                            }
+                        }
+                    },
+                    leaders: {
+                        display: "领导频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/leaders.xml"]
+                            }
+                        }
+                    },
+                    pic: {
+                        display: "图片频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/pic.xml"]
+                            }
+                        }
+                    },
+                    yuqing: {
+                        display: "舆情频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/yuqing.xml"]
+                            }
+                        }
+                    },
+                    hm: {
+                        display: "港澳频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/hm.xml"]
+                            }
+                        }
+                    },
+                    tc: {
+                        display: "通信频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/tc.xml"]
+                            }
+                        }
+                    },
+                    lady: {
+                        display: "时尚频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/lady.xml"]
+                            }
+                        }
+                    },
+                    hongmu: {
+                        display: "红木频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/hongmu.xml"]
+                            }
+                        }
+                    },
+                    ru: {
+                        display: "俄罗斯频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/ru.xml"]
+                            }
+                        }
+                    },
+                    japan: {
+                        display: "日本频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/japan.xml"]
+                            }
+                        }
+                    },
+                    uk: {
+                        display: "英国频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/uk.xml"]
+                            }
+                        }
+                    },
+                    usa: {
+                        display: "美国频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/usa.xml"]
+                            }
+                        }
+                    },
+                    korea: {
+                        display: "韩国频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/korea.xml"]
+                            }
+                        }
+                    },
+                    sh: {
+                        display: "上海频道",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/sh.xml"]
+                            }
+                        }
+                    },
+                    phb: {
+                        display: "热点新闻",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/phb.xml"]
+                            }
+                        }
+                    },
+                    liuyan: {
+                        display: "地方领导留言板",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/liuyan.xml"]
+                            }
+                        }
+                    },
+                    chinapic: {
+                        display: "图说中国",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/chinapic.xml"]
+                            }
+                        }
+                    },
+                    bbs: {
+                        display: "强国社区",
+                        categorys: {
+                            newer: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: ["http://www.people.com.cn/rss/bbs.xml"]
+                            }
+                        }
+                    },
+                }
+            },
+            mihoyo: {
+                display: "米游社",
+                channels: {
+                    genshin: {
+                        display: "原神",
+                        categorys: {
+                            home: {
+                                display: "主页",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/ys",
+                                    "https://rsshub.app/mihoyo/ys"
+                                ]
+                            },
+                            latest: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/ys/latest",
+                                    "https://rsshub.app/mihoyo/ys/latest"
+                                ]
+                            },
+                            notice: {
+                                display: "公告",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/ys/notice",
+                                    "https://rsshub.app/mihoyo/ys/notice"
+                                ]
+                            },
+                            activity: {
+                                display: "活动",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/ys/activity",
+                                    "https://rsshub.app/mihoyo/ys/activity"
+                                ]
+                            },
+                        }
+                    },
+                    honkaistarrail: {
+                        display: "崩坏：星穹铁道",
+                        categorys: {
+                            home: {
+                                display: "主页",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/sr",
+                                    "https://rsshub.app/mihoyo/sr"
+                                ]
+                            },
+                            news_all: {
+                                display: "最新",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/sr/news-all",
+                                    "https://rsshub.app/mihoyo/sr/news-all"
+                                ]
+                            },
+                            news: {
+                                display: "新闻",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/ys/news",
+                                    "https://rsshub.app/mihoyo/ys/news"
+                                ]
+                            },
+                            notice: {
+                                display: "公告",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/ys/notice",
+                                    "https://rsshub.app/mihoyo/ys/notice"
+                                ]
+                            },
+                            activity: {
+                                display: "活动",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/ys/activity",
+                                    "https://rsshub.app/mihoyo/ys/activity"
+                                ]
+                            },
+                        }
+                    },
+                    honkaiimpact3rd: {
+                        display: "崩坏 3",
+                        categorys: {
+                            announcement: {
+                                display: "公告",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/bbs/official/1/1/",
+                                    "https://rsshub.app/mihoyo/bbs/official/1/1/"
+                                ]
+                            },
+                            event: {
+                                display: "活动",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/bbs/official/1/2/",
+                                    "https://rsshub.app/mihoyo/bbs/official/1/2/"
+                                ]
+                            },
+                            information: {
+                                display: "活动",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/bbs/official/1/3/",
+                                    "https://rsshub.app/mihoyo/bbs/official/1/3/"
+                                ]
+                            },
+                        }
+                    },
+                    honkaigakuen2: {
+                        display: "崩坏学园 3",
+                        categorys: {
+                            announcement: {
+                                display: "公告",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/bbs/official/3/1/",
+                                    "https://rsshub.app/mihoyo/bbs/official/3/1/"
+                                ]
+                            },
+                            event: {
+                                display: "活动",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/bbs/official/3/2/",
+                                    "https://rsshub.app/mihoyo/bbs/official/3/2/"
+                                ]
+                            },
+                            information: {
+                                display: "活动",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/bbs/official/3/3/",
+                                    "https://rsshub.app/mihoyo/bbs/official/3/3/"
+                                ]
+                            },
+                        }
+                    },
+                    tearsofthemis: {
+                        display: "未定事件簿",
+                        categorys: {
+                            announcement: {
+                                display: "公告",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/bbs/official/4/1/",
+                                    "https://rsshub.app/mihoyo/bbs/official/4/1/"
+                                ]
+                            },
+                            event: {
+                                display: "活动",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/bbs/official/4/2/",
+                                    "https://rsshub.app/mihoyo/bbs/official/4/2/"
+                                ]
+                            },
+                            information: {
+                                display: "活动",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/bbs/official/4/3/",
+                                    "https://rsshub.app/mihoyo/bbs/official/4/3/"
+                                ]
+                            },
+                        }
+                    },
+                    zenlesszonezero: {
+                        display: "绝区零",
+                        categorys: {
+                            announcement: {
+                                display: "公告",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/bbs/official/8/1/",
+                                    "https://rsshub.app/mihoyo/bbs/official/8/1/"
+                                ]
+                            },
+                            event: {
+                                display: "活动",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/bbs/official/8/2/",
+                                    "https://rsshub.app/mihoyo/bbs/official/8/2/"
+                                ]
+                            },
+                            information: {
+                                display: "活动",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://rsshub.rssforever.com/mihoyo/bbs/official/8/3/",
+                                    "https://rsshub.app/mihoyo/bbs/official/8/3/"
+                                ]
+                            },
+                        }
+                    },
+                }
+            },
+            broadcast: {
+                display: "播客",
+                channels: {
+                    xiangsheng: {
+                        display: "相声",
+                        categorys: {
+                            newer: {
+                                display: "助眠",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "https://feed.firstory.me/rss/user/ckotfh6eqeyzq0831l6nk9y9w"
+                                ]
+                            },
+                        }
+                    },
+                    bandari: {
+                        display: "班得瑞 Bandari",
+                        categorys: {
+                            newer: {
+                                display: "疗愈 | 精选",
+                                showintile: true,
+                                updatemode: FeedUpdateStrategy.PrimaryFallback,
+                                sources: [
+                                    "http://www.ximalaya.com/album/36240973.xml"
+                                ]
+                            },
+                        }
+                    },
+                }
+            },
+        };
+        var pkeys = Object.keys(providers);
+        for (var i = 0; i < pkeys.length; i++) {
+            var provide = pkeys[i];
+            FeedManager.addProvider(pkeys[i], providers[provide].display);
+            var ckeys = Object.keys(providers[provide].channels);
+            for (var j = 0; j < ckeys.length; j++) {
+                var channel = ckeys[j];
+                FeedManager.addChannel(provide, channel, providers[provide].channels[channel].display);
+                var cakeys = Object.keys(providers[provide].channels[channel].categorys);
+                for (var k = 0; k < cakeys.length; k++) {
+                    var category = cakeys[k];
+                    FeedManager.addCategory(
+                        provide,
+                        channel,
+                        category,
+                        providers[provide].channels[channel].categorys[category].display,
+                        providers[provide].channels[channel].categorys[category].updatemode,
+                        providers[provide].channels[channel].categorys[category].showintile
+                    );
+                    for (var l = 0; l < providers[provide].channels[channel].categorys[category].sources.length; l++) {
+                        FeedManager.addSource(provide, channel, category, providers[provide].channels[channel].categorys[category].sources[l]);
+                    }
+                }
+            }
+        }
+    }
+    function init() {
+        listViewEl = document.getElementById("listviewbox");
+        var listView = listViewEl.winControl;
+        listView.itemDataSource = data.dataSource;
+        listView.addEventListener("iteminvoked", function (e) {
+            e.detail.itemPromise.done(function (invokedItem) {
+                var data = invokedItem.data;
+                WinJS.Navigation.navigate("/pages/article/article.html", {
+                    key: {
+                        provider: settings.values["nowProvider"],
+                        channel: settings.values["nowChannel"],
+                        category: settings.values["nowCategory"],
+                        articleurl: data.url
+                    }
+                });
+            });
+        });
+        initFeedList();
     }
     WinJS.UI.Pages.define("/pages/home/home.html", {
         // 每当用户导航至该页面时都要调用此函数。它
         // 使用应用程序的数据填充页面元素。
         ready: function (element, options) {
-            var provider = document.getElementById("providerlist");
-            var channel = document.getElementById("channellist");
-            var category = document.getElementById("categorylist");
-            // TODO: 在此处初始化页面。
-            provider.innerHTML = "";
-            channel.innerHTML = "";
-            category.innerHTML = "";
-            (function () {
-                var delay = 500;
-                var dedelay = 100;
-                var animation = [
-                    AnimationKeyFrames.Flyout.fromLeft,
-                    AnimationKeyFrames.Opacity.visible
-                ];
-                provider.style.animation = generateAnimeString(animation, delay);
-                channel.style.display = "none";
-                setTimeout(function () {
-                    channel.style.display = "";
-                    channel.style.animation = generateAnimeString(animation, delay);
+            WinJS.UI.processAll().then(function () {
+                var provider = document.getElementById("providerlist");
+                var channel = document.getElementById("channellist");
+                var category = document.getElementById("categorylist");
+                (function () {
+                    var delay = 500;
+                    var dedelay = 100;
+                    var animation = [
+                        AnimationKeyFrames.Flyout.fromLeft,
+                        AnimationKeyFrames.Opacity.visible
+                    ];
+                    provider.style.animation = generateAnimeString(animation, delay);
+                    channel.style.display = "none";
                     setTimeout(function () {
-                        channel.style.animation = "";
+                        channel.style.display = "";
+                        channel.style.animation = generateAnimeString(animation, delay);
+                        setTimeout(function () {
+                            channel.style.animation = "";
+                        }, delay);
+                    }, dedelay);
+                    setTimeout(function () {
+                        provider.style.animation = "";
                     }, delay);
-                }, dedelay);
-                setTimeout(function () {
-                    provider.style.animation = "";
-                }, delay);
-            })();
-            function init() {
-
-                WinJS.UI.processAll().then(function () {
-                    listViewEl = document.getElementById("listviewbox");
-                    var listView = listViewEl.winControl;
-                    listView.itemDataSource = data.dataSource;
-                    listView.addEventListener("iteminvoked", function (e) {
-                        e.detail.itemPromise.done(function (invokedItem) {
-                            var data = invokedItem.data;
-                            WinJS.Navigation.navigate("/pages/article/article.html", {
-                                key: {
-                                    provider: settings.values["nowProvider"],
-                                    channel: settings.values["nowChannel"],
-                                    category: settings.values["nowCategory"],
-                                    articleurl: data.url
-                                }
-                            });
-                        });
-                    });
-                    initFeedList();
-                });
-            }
-            if (FeedManager) {
-                FeedManager.load().done(function (complete) {
-                    var datas = FeedManager.datas();
-                    if (datas.providers === undefined || datas.providers === null || !datas.providers || datas.providers.length === 0) {
-                        {
-                            FeedManager.addProvider("ithome", "IT 之家");
-                            FeedManager.addChannel("ithome", "home", "主页");
-                            FeedManager.addCategory("ithome", "home", "new", "最新", FeedUpdateStrategy.PrimaryFallback);
-                            FeedManager.addSource("ithome", "home", "new", "https://www.ithome.com/rss/", true);
-                            FeedManager.addProvider("people", "人民网");
-                            FeedManager.addChannel("people", "it", "IT 频道");
-                            FeedManager.addCategory("people", "it", "new", "最新", FeedUpdateStrategy.PrimaryFallback);
-                            FeedManager.addSource("people", "it", "new", "http://www.people.com.cn/rss/it.xml", true);
-                            FeedManager.addChannel("people", "politics", "时政频道");
-                            FeedManager.addCategory("people", "politics", "new", "最新", FeedUpdateStrategy.PrimaryFallback);
-                            FeedManager.addSource("people", "politics", "new", "http://www.people.com.cn/rss/politics.xml", true);
-                            FeedManager.addChannel("people", "world", "国际频道");
-                            FeedManager.addCategory("people", "world", "new", "最新", FeedUpdateStrategy.PrimaryFallback);
-                            FeedManager.addSource("people", "world", "new", "http://www.people.com.cn/rss/world.xml", true);
-                            FeedManager.addProvider("mihoyo", "米游社");
-                            FeedManager.addChannel("mihoyo", "genshin", "原神");
-                            FeedManager.addCategory("mihoyo", "genshin", "new", "最新", FeedUpdateStrategy.PrimaryFallback);
-                            FeedManager.addSource("mihoyo", "genshin", "new", "https://rsshub.rssforever.com/mihoyo/ys", true);
-                            FeedManager.addCategory("mihoyo", "genshin", "Announcement", "公告", FeedUpdateStrategy.PrimaryFallback);
-                            FeedManager.addSource("mihoyo", "genshin", "Announcement", " https://rsshub.rssforever.com/mihoyo/bbs/official/2/1", true);
-                            FeedManager.addCategory("mihoyo", "genshin", "Event", "活动", FeedUpdateStrategy.PrimaryFallback);
-                            FeedManager.addSource("mihoyo", "genshin", "Event", "https://rsshub.rssforever.com/mihoyo/bbs/official/2/2", true);
-                            FeedManager.addCategory("mihoyo", "genshin", "Information", "资讯", FeedUpdateStrategy.PrimaryFallback);
-                            FeedManager.addSource("mihoyo", "genshin", "Information", "https://rsshub.rssforever.com/mihoyo/bbs/official/2/3", true);
-                            FeedManager.addProvider("xiangsheng", "相声");
-                            FeedManager.addChannel("xiangsheng", "sleep", "助眠");
-                            FeedManager.addCategory("xiangsheng", "sleep", "new", "最新", FeedUpdateStrategy.PrimaryFallback);
-                            FeedManager.addSource("xiangsheng", "sleep", "new", "https://feed.firstory.me/rss/user/ckotfh6eqeyzq0831l6nk9y9w", true);
+                })();
+                if (FeedManager) {
+                    FeedManager.load().done(function (complete) {
+                        var datas = FeedManager.datas();
+                        if (datas.providers === undefined || datas.providers === null || !datas.providers || datas.providers.length === 0) {
+                            initExampleData();
+                            FeedManager.save().done(
+                                function () { init(); },
+                                function () { init(); }
+                            );
+                        } else {
+                            init();
                         }
-                        FeedManager.save().done(
-                            function () { init(); },
-                            function () { init(); }
-                        );
-                    } else {
-                        init();
-                    }
-                });
-            }
-            /*
-            var csslinks = document.head.querySelectorAll("link");
-            for (var i = 0; i < csslinks.length; i++) {
-                var cssnode = csslinks[i];
-                if (NString.find (cssnode.href, "article.css") != -1) cssnode.removeNode(true);
-            }
-            */
+                    });
+                }
+                
+            }).then(function () {
+                WinJS.Resources.processAll();
+            });
         }
     });
 })();

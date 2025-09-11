@@ -123,23 +123,27 @@
     <Content Include="js\feedmgr.js" />
     <Content Include="js\fetch.js" />
     <Content Include="js\file.js" />
+    <Content Include="js\locale.js" />
     <Content Include="js\mediaelement.js" />
     <Content Include="js\navigator.js" />
     <Content Include="js\public.js" />
     <Content Include="js\event.js" />
     <Content Include="js\tiletemplate.js" />
-    <Content Include="pages\article\article.clean.css" />
+    <Content Include="msgbox\msgbox.css" />
+    <Content Include="msgbox\msgbox.js" />
     <Content Include="pages\article\article.css" />
     <Content Include="pages\article\article.html" />
     <Content Include="pages\article\article.js" />
     <Content Include="pages\feedmgr\feedmgr.css" />
     <Content Include="pages\feedmgr\feedmgr.html" />
     <Content Include="pages\feedmgr\feedmgr.js" />
-    <Content Include="pages\home\home.clean.css" />
     <Content Include="pages\home\home.css" />
     <Content Include="pages\home\home.html" />
     <Content Include="pages\home\home.js" />
     <Content Include="default.html" />
+    <Content Include="pages\settings\feedsrc\feedsrc.css" />
+    <Content Include="pages\settings\feedsrc\feedsrc.html" />
+    <Content Include="pages\settings\feedsrc\feedsrc.js" />
     <Content Include="pages\webview\webview.css" />
     <Content Include="pages\webview\webview.html" />
     <Content Include="pages\webview\webview.js" />
@@ -147,6 +151,11 @@
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="Microsoft.WinJS.2.0, Version=1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="strings\en-us\resources.resjson" />
+    <PRIResource Include="strings\zh-cn\resources.resjson" />
+    <PRIResource Include="strings\zh-tw\resources.resjson" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
   <!-- To modify your build process, add your task inside one of the targets below then uncomment
