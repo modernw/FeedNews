@@ -398,7 +398,7 @@
                         panel.style.whiteSpace = "normal";
                         panel.querySelector("#description").textContent = rcString("FeedManager.Category.Add");
                         var inputshowintile = panel.querySelector("#show-in-tile-input");
-                        var winctrlsit = new WinJS.UI.ToggleSwitch(inputshowintile, { title: rcString ('/resources/FeedManager.Item.ShowInTile'), checked: true });
+                        var winctrlsit = new WinJS.UI.ToggleSwitch(inputshowintile, { title: rcString('/resources/FeedManager.Item.ShowInTile'), checked: true });
                         var title = rcString("FeedManager.Add.Title");
                         title = title.replace("{0}", rcString("FeedManager.Category.Title"));
                         var msgboxfunc = function () {
@@ -620,6 +620,7 @@
                                         }
                                         if (NString.empty(imgurl)) {
                                             outputstatus.textContent = "Error: cannot get the image url from articles";
+                                            restone();
                                             return;
                                         }
                                         var regexp = {
@@ -663,7 +664,7 @@
                         panel.style.whiteSpace = "normal";
                         panel.querySelector("#description").textContent = rcString("FeedManager.Source.Add");
                         var title = rcString("FeedManager.Add.Title");
-                        title = title.replace("{0}", rcString("FeedManager.Category.Title"));
+                        title = title.replace("{0}", rcString("FeedManager.Source.Title"));
                         var msgboxfunc = function () {
                             MsgBox.Async(
                                 panel,
@@ -672,18 +673,25 @@
                             ).done(function (result) {
                                 if (MsgBox.Const.MBRET.IDOK === result) {
                                     try {
-                                        var inputid = panel.querySelector("#id-input");
-                                        var inputdisplay = panel.querySelector("#display-name-input");
-                                        var selectupdatemode = panel.querySelector("#update-mode-input");
-                                        var showintile = panel.querySelector("#show-in-tile-input").winControl;
-                                        FeedManager.addCategory(providerselected.dataset.id, channelselected.dataset.id, inputid.value, inputdisplay.value, selectupdatemode.value, showintile.checked);
-                                        var providerobj = FeedManager.getCategory(providerselected.dataset.id, channelselected.dataset.id, inputid.value);
-                                        var node = createItem(providerobj.id, providerobj.displayName, ItemType.category);
-                                        node.dataset.updatemode = providerobj.updateStrategy;
-                                        node.dataset.showintile = providerobj.showInTile;
-                                        categorylistnode.appendChild(node);
-                                        node.addEventListener("click", categoryClickEvent);
-                                        WinJS.UI.Animation.createAddToListAnimation(node, categorylistnode).execute();
+                                        var inputurl = panel.querySelector("#url-input");
+                                        var inputregex = panel.querySelector("#image-src-input");
+                                        var inputrep = {
+                                            medium: panel.querySelector("#image-rep-medium-input"),
+                                            wide: panel.querySelector("#image-rep-wide-input"),
+                                            large: panel.querySelector("#image-rep-large-input"),
+                                        };
+                                        FeedManager.addSource(providerselected.dataset.id, channelselected.dataset.id, categoryselected.dataset.id, inputurl.value);
+                                        try {
+                                            FeedManager.setImageRule(providerselected.dataset.id, channelselected.dataset.id, categoryselected.dataset.id, inputurl.value,
+                                                inputregex.value || "", inputrep.medium.value || "", inputrep.wide.value || "", inputrep.large.value || "");
+                                        } catch (e) { }
+                                        var providerobj = FeedManager.getSource(providerselected.dataset.id, channelselected.dataset.id, categoryselected.dataset.id, inputurl.value);
+                                        var node = createItem(providerobj.url, providerobj.url, ItemType.source);
+                                        node.dataset.url = providerobj.url;
+                                        node.dataset.imageRule = JSON.stringify(providerobj.imageRules);
+                                        sourcelistnode.appendChild(node);
+                                        node.addEventListener("click", sourceClickEvent);
+                                        WinJS.UI.Animation.createAddToListAnimation(node, sourcelistnode).execute();
                                         FeedManager.save().done(function () {
                                             node.click();
                                         });
@@ -700,6 +708,136 @@
                             });
                         };
                         msgboxfunc();
+                    });
+                    ctrlbtn.edit.addEventListener("click", function (e) {
+                        var providerselected = providerlistnode.querySelector(".selected");
+                        var channelselected = channellistnode.querySelector(".selected");
+                        var categoryselected = categorylistnode.querySelector(".selected");
+                        var selectednode = sourcelistnode.querySelector(".selected");
+                        if (!(providerselected && channelselected && categoryselected && selectednode)) return;
+                        var panel = getSourcePanel();
+                        panel.style.display = "";
+                        panel.style.whiteSpace = "normal";
+                        panel.querySelector("#description").textContent = rcString("FeedManager.Source.Add");
+                        var title = rcString("FeedManager.Edit.Title");
+                        title = title.replace("{0}", rcString("FeedManager.Source.Title"));
+                        var inputurl = panel.querySelector("#url-input");
+                        var inputregex = panel.querySelector("#image-src-input");
+                        var inputrep = {
+                            medium: panel.querySelector("#image-rep-medium-input"),
+                            wide: panel.querySelector("#image-rep-wide-input"),
+                            large: panel.querySelector("#image-rep-large-input"),
+                        };
+                        inputurl.value = selectednode.dataset.url;
+                        inputurl.disabled = true;
+                        var lastImageRule = [];
+                        try {
+                            lastImageRule = JSON.parse(selectednode.dataset.imageRule);
+                        } catch (e) { lastImageRule = [] }
+                        if (lastImageRule && lastImageRule.length) {
+                            inputregex.value = lastImageRule[0].pattern;
+                            inputrep.medium.value = lastImageRule[0].replaceMedium;
+                            inputrep.wide.value = lastImageRule[0].replaceWide;
+                            inputrep.large.value = lastImageRule[0].replaceLarge;
+                        }
+                        var msgboxfunc = function () {
+                            MsgBox.Async(
+                                panel,
+                                title,
+                                MsgBox.Const.MBFLAGS.MB_OKCANCEL
+                            ).done(function (result) {
+                                if (MsgBox.Const.MBRET.IDOK === result) {
+                                    try {
+                                        var inputurl = panel.querySelector("#url-input");
+                                        var inputregex = panel.querySelector("#image-src-input");
+                                        var inputrep = {
+                                            medium: panel.querySelector("#image-rep-medium-input"),
+                                            wide: panel.querySelector("#image-rep-wide-input"),
+                                            large: panel.querySelector("#image-rep-large-input"),
+                                        };
+                                        try {
+                                            FeedManager.setImageRule(providerselected.dataset.id, channelselected.dataset.id, categoryselected.dataset.id, inputurl.value,
+                                                inputregex.value || "", inputrep.medium.value || "", inputrep.wide.value || "", inputrep.large.value || "");
+                                        } catch (e) { }
+                                        var providerobj = FeedManager.getSource(providerselected.dataset.id, channelselected.dataset.id, categoryselected.dataset.id, inputurl.value);
+                                        var node = createItem(providerobj.url, providerobj.url, ItemType.source);
+                                        node.dataset.url = providerobj.url;
+                                        node.dataset.imageRule = JSON.stringify(providerobj.imageRules);
+                                        sourcelistnode.replaceChild(node, selectednode);
+                                        node.addEventListener("click", sourceClickEvent);
+                                        WinJS.UI.Animation.createAddToListAnimation(node, sourcelistnode).execute();
+                                        FeedManager.save().done(function () {
+                                            node.click();
+                                        });
+                                    } catch (e) {
+                                        var msg = new Windows.UI.Popups.MessageDialog(
+                                               e.message || e || "",
+                                               WinJS.Resources.getString("/resources/FeedManager.Error").value
+                                           );
+                                        msg.showAsync().done(function (result) {
+                                            msgboxfunc();
+                                        });
+                                    }
+                                }
+                            });
+                        };
+                        msgboxfunc();
+                    });
+                    ctrlbtn.del.addEventListener("click", function (e) {
+                        var providerselected = providerlistnode.querySelector(".selected");
+                        var channelselected = channellistnode.querySelector(".selected");
+                        var categoryselected = categorylistnode.querySelector(".selected");
+                        var selectednode = sourcelistnode.querySelector(".selected");
+                        if (!(providerselected && channelselected && categoryselected && selectednode)) return;
+                        var parentnode = selectednode.parentNode;
+                        var text = rcString("FeedManager.Delete.Title").replace("{0}", selectednode.textContent);
+                        var msgboxfunc = function () {
+                            MsgBox.Async(
+                                null,
+                                text,
+                                MsgBox.Const.MBFLAGS.MB_OKCANCEL
+                            ).done(function (result) {
+                                if (MsgBox.Const.MBRET.IDOK === result) {
+                                    try {
+                                        FeedManager.removeSource(providerselected.dataset.id, channelselected.dataset.id, categoryselected.dataset.id, selectednode.dataset.url);
+                                        selectednode.removeNode(true);
+                                        FeedManager.save().done(function () {
+                                            var firstnode = parentnode.querySelector(".item");
+                                            if (firstnode) firstnode.click();
+                                        });
+                                    } catch (e) {
+                                        var msg = new Windows.UI.Popups.MessageDialog(
+                                               e.message || e || "",
+                                               WinJS.Resources.getString("/resources/FeedManager.Error").value
+                                           );
+                                        msg.showAsync().done(function (result) {
+                                            msgboxfunc();
+                                        });
+                                    }
+                                }
+                            });
+                        };
+                        msgboxfunc();
+                    });
+                    ctrlbtn.moveup.addEventListener("click", function (e) {
+                        var providerselected = providerlistnode.querySelector(".selected");
+                        var channelselected = channellistnode.querySelector(".selected");
+                        var categoryselected = categorylistnode.querySelector(".selected");
+                        var selectednode = sourcelistnode.querySelector(".selected");
+                        if (!(providerselected && channelselected && categoryselected && selectednode)) return;
+                        FeedManager.moveSourceUp(providerselected.dataset.id, channelselected.dataset.id, categoryselected.dataset.id, selectednode.dataset.url);
+                        FeedManager.save();
+                        moveUp(selectednode);
+                    });
+                    ctrlbtn.movedown.addEventListener("click", function (e) {
+                        var providerselected = providerlistnode.querySelector(".selected");
+                        var channelselected = channellistnode.querySelector(".selected");
+                        var categoryselected = categorylistnode.querySelector(".selected");
+                        var selectednode = sourcelistnode.querySelector(".selected");
+                        if (!(providerselected && channelselected && categoryselected && selectednode)) return;
+                        FeedManager.moveSourceDown(providerselected.dataset.id, channelselected.dataset.id, categoryselected.dataset.id, selectednode.dataset.url);
+                        FeedManager.save();
+                        moveDown(selectednode);
                     });
                 } break;
             }
@@ -737,13 +875,18 @@
                     selectdisplay.textContent = this.textContent;
                     var rules = [];
                     try {
-                        rules = JSON.parse(node.dataset.imageRule) || [];
+                        rules = JSON.parse(this.dataset.imageRule) || [];
                     } catch (e) { }
                     if (rules && rules.length) {
-                        inputtext.src = rules[0].pattern;
-                        inputtext.medium = rules[0].replaceMedium;
-                        inputtext.wide = rules[0].replaceWide;
-                        inputtext.large = rules[0].replaceLarge;
+                        inputtext.src.value = rules[0].pattern;
+                        inputtext.medium.value = rules[0].replaceMedium;
+                        inputtext.wide.value = rules[0].replaceWide;
+                        inputtext.large.value = rules[0].replaceLarge;
+                    } else {
+                        inputtext.src.value = "";
+                        inputtext.medium.value = "";
+                        inputtext.wide.value = "";
+                        inputtext.large.value = "";
                     }
                 }
             };
@@ -802,7 +945,7 @@
                     var s = sourcelist[i];
                     var node = createItem(s.url, s.url, ItemType.source);
                     node.dataset.url = s.url;
-                    node.dataset.imageRule = JSON.stringify(s.imageRule);
+                    node.dataset.imageRule = JSON.stringify(s.imageRules);
                     WinJS.UI.Animation.createAddToListAnimation(node, sourcelistnode).execute();
                     sourcelistnode.appendChild(node);
                     node.addEventListener("click", sourceClickEvent);
@@ -823,7 +966,7 @@
                     var c = categorylist[i];
                     var node = createItem(c.id, c.displayName, ItemType.category);
                     node.dataset.updatemode = c.updateStrategy;
-                    node.dataset.showintile = c.showInTile; 
+                    node.dataset.showintile = c.showInTile;
                     WinJS.UI.Animation.createAddToListAnimation(node, categorylistnode).execute();
                     categorylistnode.appendChild(node);
                     node.addEventListener("click", categoryClickEvent);

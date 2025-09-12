@@ -131,18 +131,19 @@
                     return basePath + url;
                 }
             }
+            swHtml = swHtml.replace(/\r?\n/g, " ");
             // img src
-            swMatch = /<img[^>]+src=["']([^"']+)["']/i.exec(swHtml);
+            swMatch = /<img[\s\S]+?src=["']([^"']+)["']/i.exec(swHtml);
             if (swMatch && swMatch[1]) {
                 return completeUrl(swMatch[1], this.link);
             }
             // video poster
-            swMatch = /<video[^>]+poster=["']([^"']+)["']/i.exec(swHtml);
+            swMatch = /<video[\s\S]+?poster=["']([^"']+)["']/i.exec(swHtml);
             if (swMatch && swMatch[1]) {
                 return completeUrl(swMatch[1], this.link);
             }
             // div style background-image
-            swMatch = /<div[^>]+style=["'][^"']*background-image\s*:\s*url\((['"]?)([^'")]+)\1\)/i.exec(swHtml);
+            swMatch = /<div[\s\S]+?style=["'][^"']*background-image\s*:\s*url\((['"]?)([^'")]+)\1\)/i.exec(swHtml);
             if (swMatch && swMatch[2]) {
                 return completeUrl(swMatch[2], this.link);
             }

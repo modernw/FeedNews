@@ -114,9 +114,9 @@
                         </button>
                     </div>
                     <label for="category-updatemode" class="win-label">更新方式</label><br />
-                    <select id="category-updatemode" value="PrimaryCallback"></select>
+                    <select id="category-updatemode" value="PrimaryCallback" disabled></select>
                     <div id="category-showintile" data-win-control="WinJS.UI.ToggleSwitch"
-                         data-win-options="{title:'显示在磁贴上', checked:true}"></div>
+                         data-win-options="{title:'显示在磁贴上', checked:true, disabled: true}"></div>
                 </div>
                 <div class="divide"></div>
                 <div class="manager-block" data-type="source">
@@ -148,13 +148,13 @@
                     <label for="source-imagereplacerule">图片链接修正原则</label>
                     <div>
                         <label for="source-irr-src">用于提取的正则</label>
-                        <input type="text" placeholder="用于提取的正则" id="source-irr-src" /><br />
+                        <input type="text" placeholder="用于提取的正则" id="source-irr-src" readonly /><br />
                         <label for="source-irr-medium" class="win-label">中磁贴</label><br />
-                        <input type="text" placeholder="用于替换的部分" id="source-irr-medium-rep" /><br />
+                        <input type="text" placeholder="用于替换的部分" id="source-irr-medium-rep" readonly /><br />
                         <label for="source-irr-wide" class="win-label">宽磁贴</label><br />
-                        <input type="text" placeholder="用于替换的部分" id="source-irr-wide-rep" /><br />
+                        <input type="text" placeholder="用于替换的部分" id="source-irr-wide-rep" readonly /><br />
                         <label for="source-irr-large" class="win-label">大磁贴</label><br />
-                        <input type="text" placeholder="用于替换的部分" id="source-irr-large-rep" />
+                        <input type="text" placeholder="用于替换的部分" id="source-irr-large-rep" readonly />
                     </div>
                 </div>
             </div>

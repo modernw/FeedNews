@@ -342,6 +342,24 @@
         }
     };
 
+    FeedManager.prototype.setImageRule = function (swProviderId, swChannelId, swCategoryId, swUrl, swPattern, swMedium, swWide, swLarge) {
+        var oSource = this.getSource(swProviderId, swChannelId, swCategoryId, swUrl);
+        if (!oSource) return null;
+        var oRule = new ImageReplaceRule(swPattern, swWide, swMedium, swLarge);
+        oSource.imageRules = [oRule];
+        return oRule;
+    };
+
+    FeedManager.prototype.getImageRule = function (swProviderId, swChannelId, swCategoryId, swUrl) {
+        var oSource = this.getSource(swProviderId, swChannelId, swCategoryId, swUrl);
+        if (!oSource) return null;
+        try {
+            return oSource.imageRules[0];
+        } catch (e) {
+        }
+        return null;
+    };
+
     // ===== API：获取所有数据 =====
     // providers 和 channels 和 categories 和 sources
     FeedManager.prototype.datas = function () {
