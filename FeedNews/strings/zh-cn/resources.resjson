@@ -57,5 +57,7 @@
 	"FeedManager.Item.Result": "测试结果",
 	"FeedManager.Item.Status": "状态",
 	"FeedManager.Item.ImageRule.Test": "测试替换是否有效",
-	"FeedManager.Item.ImageRule.Result": "替换后结果"
+	"FeedManager.Item.ImageRule.Result": "替换后结果",
+	"FeedManager.Title": "Feed 源管理",
+	"FeedManager.Description": "在这里，您可以进行对源的增添、删除等操作。"
 }

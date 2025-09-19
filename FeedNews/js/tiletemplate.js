@@ -1831,16 +1831,13 @@
             doc.loadXml("<tile><visual/></tile>");
             var root = doc.documentElement;
             var visual = root.selectSingleNode("visual");
-
             for (var i = 0; i < this.tiles.length; i++) {
                 var tile = this.tiles[i];
                 var binding = doc.createElement("binding");
                 binding.setAttribute("template", tile.template);
-
                 if (!labelEmpty(tile.fallback)) {
                     binding.setAttribute("fallback", tile.fallback);
                 }
-
                 // 用 getAttribute 判断属性是否存在
                 var visualVersion = visual.getAttribute("version");
                 if (
@@ -1903,6 +1900,7 @@
     }
     extern({
         TileTemplate: TileTemplate,
-        TileGroup: TileGroup
+        TileGroup: TileGroup,
+        getBlankImageUri: getBlankImageUri
     });
 })();

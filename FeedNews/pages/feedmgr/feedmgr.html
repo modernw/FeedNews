@@ -3,17 +3,52 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
-    <title>feedmgr</title>
-    <link href="//Microsoft.WinJS.2.0/css/ui-dark.css" rel="stylesheet" />
+    <title data-win-res="{textContent: '/resources/FeedManager.Title'}"></title>
+    <link href="//Microsoft.WinJS.2.0/css/ui-light.css" rel="stylesheet" />
     <script src="//Microsoft.WinJS.2.0/js/base.js"></script>
     <script src="//Microsoft.WinJS.2.0/js/ui.js"></script>
     <script src="/js/public.js"></script>
+    <script src="/js/fetch.js"></script>
     <link href="/msgbox/msgbox.css" rel="stylesheet" />
     <script src="/msgbox/msgbox.js"></script>
     <script src="/js/tiletemplate.js"></script>
+    <script src="/js/environment.js"></script>
+    <script src="/js/tile.js"></script>
     <script src="/js/locale.js"></script>
+    <script src="/js/screen.js"></script>
     <script src="/js/feedmgr.js"></script>
     <script src="/js/feed.js"></script>
+    <script src="/js/uri.js"></script>
+    <link href="/codemirror5-5.0.0/lib/codemirror.css" rel="stylesheet" />
+    <link href="/codemirror5-5.0.0/theme/neat.css" rel="stylesheet" />
+    <link href="/codemirror5-5.0.0/addon/hint/show-hint.css" rel="stylesheet" />
+    <script src="/codemirror5-5.0.0/lib/codemirror.js"></script>
+    <script src="/codemirror5-5.0.0/addon/edit/matchbrackets.js"></script>
+    <script src="/codemirror5-5.0.0/addon/edit/closebrackets.js"></script>
+    <script src="/codemirror5-5.0.0/addon/search/searchcursor.js"></script>
+    <script src="/codemirror5-5.0.0/addon/search/match-highlighter.js"></script>
+    <script src="/codemirror5-5.0.0/addon/search/matchesonscrollbar.js"></script>
+    <script src="/codemirror5-5.0.0/addon/comment/continuecomment.js"></script>
+    <script src="/codemirror5-5.0.0/addon/comment/comment.js"></script>
+    <script src="/codemirror5-5.0.0/addon/fold/foldcode.js"></script>
+    <script src="/codemirror5-5.0.0/addon/fold/foldgutter.js"></script>
+    <script src="/codemirror5-5.0.0/addon/fold/brace-fold.js"></script>
+    <script src="/codemirror5-5.0.0/addon/fold/comment-fold.js"></script>
+    <script src="/codemirror5-5.0.0/addon/fold/xml-fold.js"></script>
+    <script src="/codemirror5-5.0.0/addon/hint/show-hint.js"></script>
+    <script src="/codemirror5-5.0.0/addon/hint/javascript-hint.js"></script>
+    <script src="/codemirror5-5.0.0/addon/display/panel.js"></script>
+    <script src="/codemirror5-5.0.0/addon/lint/lint.js"></script>
+    <script src="/codemirror5-5.0.0/addon/lint/javascript-lint.js"></script>
+    <script src="/codemirror5-5.0.0/mode/javascript/javascript.js"></script>
+    <style type="text/css">
+        .CodeMirror {
+            box-sizing: border-box;
+            border-top: 1px solid black;
+            border-bottom: 1px solid black;
+            font-family: 'Fixedsys Excelsior 3.01', Consolas, Monaco, 'Andale Mono', monospace, 'Fixedsys Excelsior 1.2', 'Fixedsys Excelsior 1.01', 'Fixedsys Excelsior 1.1', 'Fixedsys Excelsior 3.1', 'Microsoft YaHei', 'Lucida Console', 'Courier New', 'Courier', 'Lucida Sans Typewriter', 'Lucida Sans Typewriter', 'Bitstream Vera Sans Mono', 'Bitstream Vera Sans', 'DejaVu Sans Mono', 'DejaVu Sans', 'Verdana', 'Arial', sans-serif, 'Fixedsys';
+        }
+    </style>
     <link href="feedmgr.css" rel="stylesheet" />
     <script src="feedmgr.js"></script>
 </head>
@@ -22,145 +57,145 @@
         <header class="page-header" aria-label="Header content" role="banner">
             <button class="back-button" data-win-control="WinJS.UI.BackButton"></button>
             <h1 class="titlearea win-type-ellipsis">
-                <span class="pagetitle">Feed 源管理</span>
+                <span class="pagetitle" data-win-res="{textContent: '/resources/FeedManager.Title'}"></span>
             </h1>
         </header>
         <section class="page-section" aria-label="Main content" role="main">
-            <p>在这里，您可以进行对源的增添、删除等操作。</p>
+            <p data-win-res="{textContent: '/resources/FeedManager.Description'}"></p>
             <div class="manager-container" id="feedmgr-html-blockcontainer">
                 <div class="manager-block" data-type="provider">
-                    <h2>提供者</h2>
+                    <h2 data-win-res="{textContent: '/resources/FeedManager.Provider.Title'}"></h2>
                     <div class="manager-list">
-                        <div class="item"><span>项 1 Item 1</span></div>
-                        <div class="item selected"><span>项 2 Item 2</span></div>
                     </div>
-                    <p style="word-break: break-all;">当前选中的项：<span>(无)</span></p>
+                    <p style="word-break: break-all; display: none;">当前选中的项：<span>(无)</span></p>
                     <div class="manager-command">
                         <button class="win-command add">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57609;</span></span>
-                            <span class="win-label">添加</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Add'}"></span>
                         </button>
                         <button class="win-command edit">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57604;</span></span>
-                            <span class="win-label">编辑</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Edit'}"></span>
                         </button>
                         <button class="win-command delete">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57606;</span></span>
-                            <span class="win-label">删除</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Delete'}"></span>
                         </button>
                         <button class="win-command moveup">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57616;</span></span>
-                            <span class="win-label">上移</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.MoveUp'}"></span>
                         </button>
                         <button class="win-command movedown">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57853;</span></span>
-                            <span class="win-label">下移</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.MoveDown'}"></span>
                         </button>
                     </div>
                 </div>
                 <div class="divide"></div>
                 <div class="manager-block" data-type="channel">
-                    <h2>频道</h2>
+                    <h2 data-win-res="{textContent: '/resources/FeedManager.Channel.Title'}"></h2>
                     <div class="manager-list"></div>
-                    <p style="word-break: break-all;">当前选中的项：<span>(无)</span></p>
+                    <p style="word-break: break-all; display: none;">当前选中的项：<span>(无)</span></p>
                     <div class="manager-command">
                         <button class="win-command add">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57609;</span></span>
-                            <span class="win-label">添加</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Add'}"></span>
                         </button>
                         <button class="win-command edit">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57604;</span></span>
-                            <span class="win-label">编辑</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Edit'}"></span>
                         </button>
                         <button class="win-command delete">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57606;</span></span>
-                            <span class="win-label">删除</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Delete'}"></span>
                         </button>
                         <button class="win-command moveup">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57616;</span></span>
-                            <span class="win-label">上移</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.MoveUp'}"></span>
                         </button>
                         <button class="win-command movedown">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57853;</span></span>
-                            <span class="win-label">下移</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.MoveDown'}"></span>
                         </button>
                     </div>
                 </div>
                 <div class="divide"></div>
                 <div class="manager-block" data-type="category">
-                    <h2>分类</h2>
+                    <h2 data-win-res="{textContent: '/resources/FeedManager.Category.Title'}"></h2>
                     <div class="manager-list"></div>
-                    <p style="word-break: break-all;">当前选中的项：<span>(无)</span></p>
+                    <p style="word-break: break-all; display: none;">当前选中的项：<span>(无)</span></p>
                     <div class="manager-command">
                         <button class="win-command add">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57609;</span></span>
-                            <span class="win-label">添加</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Add'}"></span>
                         </button>
                         <button class="win-command edit">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57604;</span></span>
-                            <span class="win-label">编辑</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Edit'}"></span>
                         </button>
                         <button class="win-command delete">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57606;</span></span>
-                            <span class="win-label">删除</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Delete'}"></span>
                         </button>
                         <button class="win-command moveup">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57616;</span></span>
-                            <span class="win-label">上移</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.MoveUp'}"></span>
                         </button>
                         <button class="win-command movedown">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57853;</span></span>
-                            <span class="win-label">下移</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.MoveDown'}"></span>
                         </button>
                     </div>
-                    <label for="category-updatemode" class="win-label">更新方式</label><br />
+                    <label for="category-updatemode" class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.UpdateMode'} "></label><br />
                     <select id="category-updatemode" value="PrimaryCallback" disabled></select>
                     <div id="category-showintile" data-win-control="WinJS.UI.ToggleSwitch"
-                         data-win-options="{title:'显示在磁贴上', checked:true, disabled: true}"></div>
+                         data-win-options="{title:'', checked:true, disabled: true}"
+                         data-win-res="{winControl: { title: '/resources/FeedManager.Item.ShowInTile'}} "></div>
                 </div>
                 <div class="divide"></div>
                 <div class="manager-block" data-type="source">
-                    <h2>来源</h2>
-                    <div class="manager-list" style="height: calc(100% - 540px);"></div>
-                    <p style="word-break: break-all;">当前选中的项：<span>(无)</span></p>
+                    <h2 data-win-res="{textContent: '/resources/FeedManager.Source.Title'}"></h2>
+                    <div class="manager-list" style="height: calc(100% - 400px);"></div>
+                    <p style="word-break: break-all; display: none;">当前选中的项：<span>(无)</span></p>
                     <div class="manager-command">
                         <button class="win-command add">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57609;</span></span>
-                            <span class="win-label">添加</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Add'}"></span>
                         </button>
                         <button class="win-command edit">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57604;</span></span>
-                            <span class="win-label">编辑</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Edit'}"></span>
                         </button>
                         <button class="win-command delete">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57606;</span></span>
-                            <span class="win-label">删除</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Delete'}"></span>
                         </button>
                         <button class="win-command moveup">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57616;</span></span>
-                            <span class="win-label">上移</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.MoveUp'}"></span>
                         </button>
                         <button class="win-command movedown">
                             <span class="win-commandicon win-commandring"><span class="win-commandimage">&#57853;</span></span>
-                            <span class="win-label">下移</span>
+                            <span class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.MoveDown'}"></span>
                         </button>
                     </div>
-                    <label for="source-imagereplacerule">图片链接修正原则</label>
-                    <div>
-                        <label for="source-irr-src">用于提取的正则</label>
-                        <input type="text" placeholder="用于提取的正则" id="source-irr-src" readonly /><br />
-                        <label for="source-irr-medium" class="win-label">中磁贴</label><br />
-                        <input type="text" placeholder="用于替换的部分" id="source-irr-medium-rep" readonly /><br />
-                        <label for="source-irr-wide" class="win-label">宽磁贴</label><br />
-                        <input type="text" placeholder="用于替换的部分" id="source-irr-wide-rep" readonly /><br />
-                        <label for="source-irr-large" class="win-label">大磁贴</label><br />
-                        <input type="text" placeholder="用于替换的部分" id="source-irr-large-rep" readonly />
+                    <label for="source-imagereplacerule" data-win-res="{textContent: '/resources/FeedManager.Item.ImageRule.Title'} "></label>
+                    <div style="display: none;">
+                        <label for="source-irr-src" data-win-res="{textContent: '/resources/FeedManager.Item.ImageRule.Source'} "></label>
+                        <input type="text" id="source-irr-src" readonly data-win-res="{placeholder: '/resources/FeedManager.Item.ImageRule.Source'} " /><br />
+                        <label for="source-irr-medium" class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Medium'} "></label><br />
+                        <input type="text" id="source-irr-medium-rep" readonly data-win-res="{placeholder: '/resources/FeedManager.Item.ImageRule.Replace'} " /><br />
+                        <label for="source-irr-wide" class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Wide'} "></label><br />
+                        <input type="text" id="source-irr-wide-rep" readonly data-win-res="{placeholder: '/resources/FeedManager.Item.ImageRule.Replace'} " /><br />
+                        <label for="source-irr-large" class="win-label" data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Large'} "></label><br />
+                        <input type="text" id="source-irr-large-rep" readonly data-win-res="{placeholder: '/resources/FeedManager.Item.ImageRule.Replace'} " />
                     </div>
+                    <textarea style="width: 100%; height: 200px" readonly class="source-codedisplay"></textarea>
                 </div>
             </div>
         </section>
-        <div id="provider_channel_create_edit" style="display: none;">
-            <p id="description">现在我们要添加/修改提供者/频道的信息。</p>
+        <div id="provider_channel_create_edit" style="display: none;" class="template-msgbox">
+            <p id="description"></p>
             <table>
                 <tbody>
                     <tr>
@@ -176,8 +211,8 @@
                 </tbody>
             </table>
         </div>
-        <div id="category_create_edit" style="display: none;">
-            <p id="description">现在我们要添加/修改分类信息。</p>
+        <div id="category_create_edit" style="display: none;" class="template-msgbox">
+            <p id="description"></p>
             <table>
                 <tbody>
                     <tr>
@@ -202,18 +237,13 @@
                 </tbody>
             </table>
         </div>
-        <div id="source_create_edit" style="display: none; width: 100%;">
-            <p id="description">现在我们要添加/修改源信息。</p>
-            <table>
-                <tbody>
-                    <tr>
-                        <td data-win-res="{textContent: '/resources/FeedManager.Item.URL'}"></td>
-                        <td><input type="text" id="url-input" /></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td data-win-res="{textContent: '/resources/FeedManager.Item.ImageRule.Title'}" colspan="3" style="font-weight: bold;"></td>
-                    </tr>
+        <div id="source_create_edit" style="display: none; width: 100%;" class="source_create_edit template-msgbox">
+            <p id="description"></p>
+            <label for="url-input" data-win-res="{textContent: '/resources/FeedManager.Item.URL'}"></label>
+            <input type="text" id="url-input" />
+            <p data-win-res="{textContent: '/resources/FeedManager.Item.ImageRule.Title'}" style="font-weight: bold;"></p>
+            <table style="width: 100%; display: none;">
+                <tbody style="width:100%;">
                     <tr>
                         <td data-win-res="{textContent: '/resources/FeedManager.Item.ImageRule.Source'}"></td>
                         <td><input type="text" id="image-src-input" /></td>
@@ -240,19 +270,102 @@
                     </tr>
                 </tbody>
             </table>
-            <div>
-                <button data-win-res="{textContent: '/resources/FeedManager.Item.ImageRule.Test'}" id="test-command"></button>
+            <div style="position: relative; width: calc(100% - 48px); height: 100%; display: block; white-space: unset;" class="win-code">
+                <textarea id="js-code" name="code">
+// The following describes the variables used, which need to be referenced via `this`.
+//     srcurl: The input image URL before processing. This variable should be read by the user.
+//             You need to process the URL based on this variable. If srcurl is empty
+//             (null, void 0 (undefined), or ""), you can use NString.empty(swString) to check
+//             for empty text. In such a case, set desturl to empty text (i.e., desturl = "")
+//             or leave desturl unset; it will be handled automatically.
+//     desturl: The output variable for the processed image URL. The user should assign a value
+//             to it. By default, desturl is void 0 (undefined). Store the processed URL in desturl.
+//             After processing, desturl will be returned. If processing fails, leave desturl unset
+//             or set it to empty text.
+//     width: Image width (integer). This variable stores the width of the tile to be set and should
+//            be read by the user. Typically, a medium tile is 150px, and a wide/large tile is 310px.
+//            DPI-adjusted values may also be passed (e.g., for 140% DPI, medium tile = 210px,
+//            wide/large tile = 434px).
+//     height: Image height (integer). This variable stores the height of the tile to be set and should
+//             be read by the user. Similar rules as width apply.
+//     type: Tile type (string). This variable should be read by the user. There are only three types:
+//           medium, wide, and large ("medium", "wide", "large"). Small tiles are not used for dynamic tiles and are not set.
+//
+// Example usage of variables:
+// this.desturl = this.srcurl + "?w=" + this.width + "&h=" + this.height;
+//
+// Notes on APIs:
+//     During testing, only alert, confirm, and prompt can be used to display message boxes.
+//     These three functions are asynchronous and wrapped in a debounce to prevent frequent calls.
+//     It is recommended not to call them; instead, use confirm or prompt for information output.
+//     Console-related APIs are unavailable (even if they exist, output won't be visible).
+//     In non-testing phases, remove any code using these three functions for debugging output.
+//     Asynchronous operations are prohibited. Only synchronous code is allowed.
+//     Browser DOM APIs are prohibited because execution occurs in a background task without such APIs.
+//     WinRT XML-related APIs may be used, but practical usage is rare.
+//     RegExp, Math, JSON, Date can be used for text operations.
+//
+// Available self-implemented (or AI-assisted) APIs:
+//     NString: Text processing utilities, static methods:
+//         trim(swString): Trims leading and trailing whitespace. Usage: NString.trim(swString)
+//         toupper/tolower(swString): Convert to upper/lower case. Usage: NString.toupper(swString)
+//         compare(swStr1, swStr2): Compare strings ignoring case and leading/trailing whitespace.
+//             Usage: NString.compare(swStr1, swStr2)
+//         equals(swStr1, swStr2): Returns true if strings are equal ignoring case and whitespace.
+//             Usage is the same as compare.
+//         empty(swString): Returns true if string is empty after trimming and ignoring case.
+//             Returns true for null or undefined.
+//         normalize(swString): Returns a lowercase, trimmed version of the string; empty strings
+//             are returned as "".
+//         find(swSrc, swSub): Returns the index of substring ignoring case and whitespace. Returns -1 if not found.
+//
+//     Link: Helper for URL processing
+//         Url: URL handling class
+//             constructor(swUrl): Creates a new Url object. Usage: var url = new Link.Url([swUrl])
+//             url: Property to get/set the URL string
+//             scheme: Property for the scheme (e.g., "http", "https")
+//             authority: Property for URI authority
+//             path: Property for the path
+//             fragment: Property for the fragment identifier
+//             params: Property for query parameters. Usage: url.params["key1"] = value1
+//             host: Property for the host name
+//             port: Property for the port number
+//             userinfo: Property for user information
+</textarea>
             </div>
-            <div style="width: 100%;">
+            <br />
+            <div style="display: flex; flex-direction: row; align-content: center;">
+                <button data-win-res="{textContent: '/resources/FeedManager.Item.ImageRule.Test'}" id="test-command"></button>
+                <div id="loading-display" style="display: none; flex-direction: row; align-content: center; align-items: center; margin-left: 20px;"><progress class="win-ring" style="color: white;"></progress>&nbsp;<div>请稍候...</div></div>
+            </div>
+            <div style="width: 100%;" class="process-result-block-list">
                 <p><span data-win-res="{textContent: '/resources/FeedManager.Item.Result'}"></span>: </p>
                 <p><span data-win-res="{textContent: '/resources/FeedManager.Item.Status'}"></span>: <span id="status-result"></span></p>
-                <p><span data-win-res="{textContent: '/resources/FeedManager.Source.Title'}"></span>: <span id="url-src"></span></p>
+                <select id="url-imglist" style="max-width: calc(100% - 24px)"></select>
+                <br />
                 <span data-win-res="{textContent: '/resources/FeedManager.Item.ImageRule.Result'}"></span><span>: </span>
-                <div style="width: 100%;">
+                <div style="width: calc(100% - 24px);">
                     <div style="width: 100%; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: flex-start; overflow: auto hidden;">
-                        <div><span data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Medium'}"></span>: <span id="rep-medium"></span><br /><img src="/images/blank/imagePlacehold150.png" width="150" height="150" /></div>
-                        <div><span data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Wide'}"></span>: <span id="rep-wide"></span><br /><img src="/images/blank/imagePlacehold310x150.png" width="310" height="150" /></div>
-                        <div><span data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Large'}"></span>: <span id="rep-large"></span><br /><img src="/images/blank/imagePlacehold310.png" width="310" height="310" /></div>
+                        <div style="width: 420px;">
+                            <p><span data-win-res="{textContent: '/resources/FeedManager.Source.Title'}"></span>: <span id="url-src"></span></p>
+                            <span>Picture Size: </span><span id="pic-width">0</span><span> * </span><span id="pic-height">0</span><br />
+                            <img id="url-src-preview" style="max-width: 400px; max-height: 300px;" />
+                        </div>
+                        <div>
+                            <span data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Medium'}"></span>: <span id="rep-medium"></span><br />
+                            <span>Picture Size: </span><span id="pwidth">0</span><span> * </span><span id="pheight">0</span><br />
+                            <img style="max-width: 150px; max-height: 150px;" />
+                        </div>
+                        <div>
+                            <span data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Wide'}"></span>: <span id="rep-wide"></span><br />
+                            <span>Picture Size: </span><span id="pwidth">0</span><span> * </span><span id="pheight">0</span><br />
+                            <img style="max-width: 310px; max-height: 150px;" />
+                        </div>
+                        <div>
+                            <span data-win-res="{textContent: '/resources/FeedManager.Item.Tile.Large'}"></span>: <span id="rep-large"></span><br />
+                            <span>Picture Size: </span><span id="pwidth">0</span><span> * </span><span id="pheight">0</span><br />
+                            <img style="max-width: 310px; max-height: 310px;" />
+                        </div>
                     </div>
                 </div>
             </div>

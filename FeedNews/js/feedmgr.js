@@ -24,6 +24,21 @@
     function Source(swUrl) {
         this.url = NString.trim (swUrl || "");
         this.imageRules = []; // ImageReplaceRule[]
+        this.urlJsCode = "";
+        //this.getProcessedUrl = function (swUrl, eTileSize) {
+        //    var srcurl = swUrl;
+        //    var width = eTileSize.scaledWidth || eTileSize.width || 150;
+        //    var height = eTileSize.scaledWidth || eTileSize.height || 150;
+        //    var desturl = void 0;
+        //    var type = eTileSize.type || "medium";
+        //    var result = "";
+        //    try {
+        //        result = eval(this.urlJsCode || "");
+        //    } catch (e) {
+        //        result = "";
+        //    }
+        //    return result || desturl || swUrl || "";
+        //}
     }
 
     function Category(swId, swName) {
@@ -33,7 +48,7 @@
         this.sources = []; // Source[]
         this.showInTile = true;
     }
-
+    
     Category.prototype.getUrlList = function (bGetForTile) {
         if (bGetForTile === null || bGetForTile === undefined) { bGetForTile = false; }
         var list = [];
@@ -320,6 +335,24 @@
     FeedManager.prototype.moveSourceDown = function (swProviderId, swChannelId, swCategoryId, swUrl) {
         var oCategory = this.getCategory(swProviderId, swChannelId, swCategoryId);
         if (oCategory) _moveItem(oCategory.sources, swUrl, 1, true);
+    };
+
+    FeedManager.prototype.getSourceEvalCode = function (swProviderId, swChannelId, swCategoryId, swUrl) {
+        var oCategory = this.getCategory(swProviderId, swChannelId, swCategoryId);
+        if (!oCategory) return null;
+        for (var i = 0; i < oCategory.sources.length; i++) {
+            if (oCategory.sources[i].url === swUrl) return oCategory.sources[i].urlJsCode;
+        }
+        return null;
+    };
+
+    FeedManager.prototype.setSourceEvalCode = function (swProviderId, swChannelId, swCategoryId, swUrl, swJsCode) {
+        var oCategory = this.getCategory(swProviderId, swChannelId, swCategoryId);
+        if (!oCategory) return null;
+        for (var i = 0; i < oCategory.sources.length; i++) {
+            if (oCategory.sources[i].url === swUrl) return oCategory.sources[i].urlJsCode = swJsCode || "";
+        }
+        return null;
     };
 
     // ===== API：ImageReplaceRule 操作 =====

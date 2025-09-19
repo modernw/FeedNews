@@ -4,7 +4,7 @@
   <Properties>
     <DisplayName>FeedNews</DisplayName>
     <PublisherDisplayName>Bruce</PublisherDisplayName>
-    <Logo>images\storelogo.png</Logo>
+    <Logo>images\tiles\storelogo.png</Logo>
   </Properties>
   <Prerequisites>
     <OSMinVersion>6.3.0</OSMinVersion>
@@ -15,9 +15,25 @@
   </Resources>
   <Applications>
     <Application Id="App" StartPage="default.html">
-      <m2:VisualElements DisplayName="ms-resource:App.AppTitle" Description="ms-resource:App.AppDescription" ForegroundText="light" BackgroundColor="#464646" Square150x150Logo="images\Logo.png" Square30x30Logo="images\SmallLogo.png">
-        <m2:SplashScreen Image="images\splashscreen.png" />
+      <m2:VisualElements DisplayName="ms-resource:App.AppTitle" Description="ms-resource:App.AppDescription" ForegroundText="light" BackgroundColor="#DA8515" Square150x150Logo="images\tiles\medium.png" Square30x30Logo="images\tiles\tiny.png">
+        <m2:LockScreen Notification="badgeAndTileText" BadgeLogo="images\tiles\badge.png" />
+        <m2:DefaultTile ShortName="ms-resource:App.AppTitle" Square310x310Logo="images\tiles\large.png" Wide310x150Logo="images\tiles\wide.png" Square70x70Logo="images\tiles\small.png">
+          <m2:ShowNameOnTiles>
+            <m2:ShowOn Tile="square150x150Logo" />
+            <m2:ShowOn Tile="square310x310Logo" />
+          </m2:ShowNameOnTiles>
+        </m2:DefaultTile>
+        <m2:SplashScreen Image="images\tiles\splash.png" BackgroundColor="#DA8515" />
       </m2:VisualElements>
+      <Extensions>
+        <Extension Category="windows.backgroundTasks" StartPage="js\backtask.js">
+          <BackgroundTasks>
+            <Task Type="systemEvent" />
+            <Task Type="timer" />
+            <Task Type="pushNotification" />
+          </BackgroundTasks>
+        </Extension>
+      </Extensions>
     </Application>
   </Applications>
   <Capabilities>

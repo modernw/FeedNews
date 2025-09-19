@@ -356,6 +356,29 @@
                 })
             },
             Async: MessageBoxAsync
+        },
+        alert: function (message) {
+            // return MsgBox.Async(message, null, null, null);
+            return Windows.UI.Popups.MessageDialog(message).showAsync();
+        },
+        confirm: function (message) {
+            return MsgBox.Async(message, null, MsgBox.Const.MBFLAGS.MB_OKCANCEL, null);
+        },
+        prompt: function (message, defaultValue) {
+            var div = document.createElement("div");
+            var p = document.createElement("span");
+            p.textContent = message;
+            var input = document.createElement("input");
+            input.type = "text";
+            input.value = defaultValue || "";
+            div.appendChild(p);
+            div.appendChild(document.createElement("br"));
+            div.appendChild (input);
+            return MsgBox.Async (div, null, MsgBox.Const.MBFLAGS.MB_OKCANCEL, null).then (function (result) {
+                if (result === MsgBox.Const.MBRET.IDOK) {
+                    return input.value;
+                } else return null;
+            })
         }
     });
 })();

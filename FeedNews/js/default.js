@@ -12,7 +12,7 @@
     WinJS.Application.onsettings = function (e) {
         e.detail.applicationcommands = {
             "feedmgr": {
-                title: "Feed 源管理",
+                title: rcString("FeedManager.Title"),
                 href: "/pages/settings/feedsrc/feedsrc.html"
             }
         };

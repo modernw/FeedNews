@@ -183,6 +183,11 @@
                 cover: this.cover || this.getFirstPic () || ""
             };
         };
+        this.tileImage = {
+            medium: "",
+            wide: "",
+            large: ""
+        };
     }
     function FeedResult() {
         this.isok = false;

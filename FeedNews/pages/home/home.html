@@ -13,10 +13,15 @@
     <script src="/js/public.js"></script>
     <script src="/js/fetch.js"></script>
     <script src="/js/file.js"></script>
+    <script src="/js/screen.js"></script>
     <script src="/js/feed.js"></script>
-    <script src="/js//tiletemplate.js"></script>
+    <script src="/js/tiletemplate.js"></script>
     <script src="/js/feedmgr.js"></script>
+    <script src="/js/uri.js"></script>
+    <script src="/js/environment.js"></script>
+    <script src="/js/tile.js"></script>
     <script src="/js/animation.js"></script>
+
     <link href="/css/default.css" rel="stylesheet" />
     <link href="home.css" rel="stylesheet" />
     <script src="home.js"></script>
@@ -40,7 +45,6 @@
     </div>
     <div id="channellist" class="slidebar home-html-sliderbar" style="background-color: gray; left: 180px; width: 150px; display: none;"></div>
     <div id="providerlist" class="slidebar home-html-sliderbar" style="background-color: #303030; position: absolute; width: 180px;"></div>
-    <!-- 将加载和显示的内容。 -->
     <div class="fragment homepage itemspage home-html-homepage home-html-itemspage home-html-fragment" style="left: calc(180px + 150px); width: calc(100% - 180px - 150px); position: absolute; top: 0px;">
         <header aria-label="Header content" role="banner" class="home-html-page-header">
             <button data-win-control="WinJS.UI.BackButton"></button>
@@ -59,7 +63,7 @@
                     itemTemplate: select('#itemFeedTemplate'),
                      layout: { type: WinJS.UI.GridLayout, orientation: 'horizontal' }
                 }">
-                <p>还没有内容...</p>
+                <p>No content yet...</p>
             </div>
         </section>
     </div>

@@ -54,12 +54,20 @@
     display: inline-block;
 }
 
+.notice-title:empty {
+    display: none;
+}
+
 .notice-text {
     color: white;
     font-weight: normal;
     white-space: pre-wrap;
     -ms-overflow-style: -ms-autohiding-scrollbar;
     display: inline-block;
+}
+
+.notice-text:empty {
+    display: none;
 }
 
 .notice-controls {

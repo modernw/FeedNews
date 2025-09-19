@@ -127,7 +127,7 @@
         // 使用应用程序的数据填充页面元素。
         ready: function (element, options) {
             WinJS.UI.processAll().then(function () {
-                getCache(options.key.provider, options.key.channel, options.key.category, options.key.articleurl).done(function (result) {
+                return getCache(options.key.provider, options.key.channel, options.key.category, options.key.articleurl).done(function (result) {
                     var title = document.getElementById("article-title");
                     title.textContent = result.article.title;
                     var content = document.getElementById("article-display");
@@ -482,6 +482,8 @@
                         });
                     }
                 });
+            }, function (e) {
+                WinJS.Navigation.back();
             }).then (function () {
                 WinJS.Resources.processAll();
             });

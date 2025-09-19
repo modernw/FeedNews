@@ -77,11 +77,10 @@
         .feedmgr .manager-container .manager-block .manager-list .item {
             text-align: left;
             width: 100%;
-            min-height: 40px;
             box-sizing: border-box;
             color: black;
             word-break: break-all;
-            height: auto;
+            padding: 10px;
         }
 
             .feedmgr .manager-container .manager-block .manager-list .item:hover {
@@ -147,6 +146,19 @@
     margin: 0;                      /* 去掉外边距 */
 }
 
-.template-msgbox table td {
+.template-msgbox table tr td {
     padding: 0;                     /* 去掉单元格内部 padding，避免额外空隙 */
+    min-width: 100%;
+}
+
+.source_create_edit .process-result-block-list div div div {
+    width: 330px;
+    height: auto;
+    padding: 5px;
+    word-break: break-all;
+}
+
+.feedmgr .manager-container .source-codedisplay + .CodeMirror {
+    width: 100%;
+    height: 200px;
 }

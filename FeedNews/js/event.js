@@ -53,12 +53,54 @@
             }
         };
     }
+    function observeChildChangeE(hNode, pfCallback) {
+        if (!hNode || typeof pfCallback !== "function") {
+            return { unregister: function () { } };
+        }
+
+        var observer = null;
+        var handlerInsert = null;
+        var handlerRemove = null;
+
+        if (window.MutationObserver) {
+            observer = new MutationObserver(function (mutations) {
+                for (var i = 0; i < mutations.length; i++) {
+                    var m = mutations[i];
+                    if (m.type === "childList") {
+                        pfCallback(m);
+                    }
+                }
+            });
+            observer.observe(hNode, { childList: true, subtree: false });
+        } else {
+            // IE10 fallback: DOMNodeInserted / DOMNodeRemoved
+            handlerInsert = function (e) { pfCallback({ type: "childList", addedNodes: [e.target], removedNodes: [] }); };
+            handlerRemove = function (e) { pfCallback({ type: "childList", addedNodes: [], removedNodes: [e.target] }); };
+
+            hNode.addEventListener("DOMNodeInserted", handlerInsert, false);
+            hNode.addEventListener("DOMNodeRemoved", handlerRemove, false);
+        }
+
+        return {
+            unregister: function () {
+                if (observer) {
+                    observer.disconnect();
+                } else {
+                    if (handlerInsert) hNode.removeEventListener("DOMNodeInserted", handlerInsert, false);
+                    if (handlerRemove) hNode.removeEventListener("DOMNodeRemoved", handlerRemove, false);
+                }
+            }
+        };
+    }
     extern({
         registerSizeChangeEvent: function (hNode, pfCallback) {
             if (!hNode || typeof pfCallback !== "function") {
                 return function () { };
             }
             return observeResizeE(hNode, pfCallback);
+        },
+        registerChildChangeEvent: function (hNode, pfCallback) {
+            return observeChildChangeE(hNode, pfCallback);
         }
     });
 })();

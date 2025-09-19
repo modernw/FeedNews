@@ -326,14 +326,12 @@
     }
     var listViewEl = null;
     var data = new WinJS.Binding.List([]);
-    var providerData = new WinJS.Binding.List([]),
-        channelData = new WinJS.Binding.List([]),
-        categoryData = new WinJS.Binding.List([]);
     var lastBlock = {
         provider: "",
         channel: "",
         category: ""
     };
+    var isFirstNavigated = false;
     function getDeltaMS(cDateLeft, cDateRight) {
         function getDate(value) {
             if (value instanceof Date) { return value; }
@@ -415,6 +413,7 @@
             var ret = !(NString.equals(lastBlock.provider, nowdata.provider) &&
                 NString.equals(lastBlock.channel, nowdata.channel) &&
                 NString.equals(lastBlock.category, nowdata.category));
+            if (!ret) ret = data.length == 0;
             lastBlock = nowdata;
             return ret;
         }
@@ -522,6 +521,7 @@
                     cnode.addEventListener("click", function (event) {
                         var isselected = this.classList.contains("selected");
                         if (!isselected) {
+                            if (data.length) data.splice(0, data.length);
                             var categoryitems = category.querySelectorAll(".item");
                             for (var j = 0; j < categoryitems.length; j++) {
                                 categoryitems[j].classList.remove("selected");
@@ -556,6 +556,8 @@
                     cnode.addEventListener("click", function (event) {
                         var isselected = this.classList.contains("selected");
                         if (!isselected) {
+                            category.innerHTML = "";
+                            if (data.length) data.splice(0, data.length);
                             var channelitems = channel.querySelectorAll(".item");
                             for (var j = 0; j < channelitems.length; j++) {
                                 channelitems[j].classList.remove("selected");
@@ -589,6 +591,9 @@
                         pnode.addEventListener("click", function (event) {
                             var isselected = this.classList.contains("selected");
                             if (!isselected) {
+                                channel.innerHTML = "";
+                                category.innerHTML = "";
+                                if (data.length) data.splice(0, data.length);
                                 var provideritems = provider.querySelectorAll(".item");
                                 for (var j = 0; j < provideritems.length; j++) {
                                     provideritems[j].classList.remove("selected");
@@ -1734,12 +1739,26 @@
                     );
                     for (var l = 0; l < providers[provide].channels[channel].categorys[category].sources.length; l++) {
                         FeedManager.addSource(provide, channel, category, providers[provide].channels[channel].categorys[category].sources[l]);
+                        switch (provide) {
+                            case "ithome": {
+                                FeedManager.setSourceEvalCode(provide, channel, category, providers[provide].channels[channel].categorys[category].sources[l],
+                                    "this.desturl = this.srcurl + '/resize,m_fill,w_' + this.width + ',h_' + this.height;");
+                            } break;
+                            case "people": {
+                                FeedManager.setSourceEvalCode(provide, channel, category, providers[provide].channels[channel].categorys[category].sources[l],
+                                    "function generateWeservUrl(srcurl,width,height){if(!srcurl)return'';var urlWithoutProtocol=srcurl.replace(/^https?:\\/\\//i,'');var encodedUrl=encodeURIComponent(urlWithoutProtocol);var desturl='https://images.weserv.nl/?url='+encodedUrl+'&w='+width+'&h='+height+'&fit=cover';return desturl}this.desturl=generateWeservUrl(this.srcurl,this.width,this.height);");
+                            } break;
+                            case "mihoyo": {
+                                FeedManager.setSourceEvalCode(provide, channel, category, providers[provide].channels[channel].categorys[category].sources[l],
+                                    "function randomFrame(){var sec=Math.floor(Math.random()*(60-6+1))+6;return sec*1000}var url=new Link.Url(this.srcurl);var elder=url.params['x-oss-process']||'';if(NString.find(elder,'video/snapshot')!=-1){url.params['x-oss-process']='video/snapshot,t_'+randomFrame()+',f_jpg,w_'+this.width}else{if(NString.empty(elder)||NString.extension(url.extension||'','.mp4')){url.params['x-oss-process']='image/resize,m_fill,w_'+this.width+',h_'+this.height+'/quality,q_100/auto-orient,0/interlace,1/format,jpg'}else{url.params['x-oss-process']+='/resize,m_fill,w_'+this.width+',h_'+this.height+'/quality,q_100/auto-orient,0/interlace,1/format,jpg'}}this.desturl=url.url;");
+                            }
+                        }
                     }
                 }
             }
         }
     }
-    function init() {
+    function initWhenFirst() {
         listViewEl = document.getElementById("listviewbox");
         var listView = listViewEl.winControl;
         listView.itemDataSource = data.dataSource;
@@ -1757,6 +1776,170 @@
             });
         });
         initFeedList();
+    }
+    function initFeedListWhenBack() {
+        var provider = document.getElementById("providerlist");
+        var channel = document.getElementById("channellist");
+        var category = document.getElementById("categorylist");
+        provider.innerHTML = "";
+        channel.innerHTML = "";
+        category.innerHTML = "";
+        if (!FeedManager) { return; }
+        FeedManager.load().done(function (complete) {
+            var nowdata = {
+                provider: settings.values["nowProvider"],
+                channel: settings.values["nowChannel"],
+                category: settings.values["nowCategory"]
+            };
+            var datas = FeedManager.datas();
+            function initCategoryItems() {
+                category.innerHTML = "";
+                var nowdata = {
+                    provider: settings.values["nowProvider"],
+                    channel: settings.values["nowChannel"],
+                    category: settings.values["nowCategory"]
+                };
+                var categories = FeedManager.getChannel(settings.values["nowProvider"], settings.values["nowChannel"]).categories;
+                var nowCategory = settings.values["nowCategory"];
+                for (var i = 0; i < categories.length; i++) {
+                    var sc = categories[i];
+                    var cnode = createItem(sc.id, sc.displayName, ITEM_NAMESPACE.category);
+                    cnode.classList.add("light");
+                    category.appendChild(cnode);
+                    WinJS.UI.Animation.createAddToListAnimation(cnode, category).execute();
+                    cnode.addEventListener("click", function (event) {
+                        var isselected = this.classList.contains("selected");
+                        if (!isselected) {
+                            if (data.length) data.splice(0, data.length);
+                            var categoryitems = category.querySelectorAll(".item");
+                            for (var j = 0; j < categoryitems.length; j++) {
+                                categoryitems[j].classList.remove("selected");
+                            }
+                            this.classList.add("selected");
+                            settings.values["nowCategory"] = this.dataset.id;
+                            updateFeeds(nowdata.provider, nowdata.channel, nowdata.category);
+                        }
+                        if (this.disabled === true) {
+                            this.classList.remove("selected");
+                        }
+                    });
+                    if (NString.equals(nowCategory, sc.id)) {
+                        if (!data.length) cnode.click();
+                        cnode.classList.add("selected");
+                    }
+                }
+                var nowSelected = category.querySelector(".selected");
+                if (!nowSelected) {
+                    var firstNode = category.querySelector(".item");
+                    if (firstNode) firstNode.click();
+                }
+            }
+            function initChannelItems() {
+                channel.innerHTML = "";
+                var channels = FeedManager.getProvider(settings.values["nowProvider"]).channels;
+                var nowChannel = settings.values["nowChannel"];
+                for (var i = 0; i < channels.length; i++) {
+                    var sp = channels[i];
+                    var cnode = createItem(sp.id, sp.displayName, ITEM_NAMESPACE.channel);
+                    channel.appendChild(cnode);
+                    WinJS.UI.Animation.createAddToListAnimation(cnode, channel).execute();
+                    cnode.addEventListener("click", function (event) {
+                        var isselected = this.classList.contains("selected");
+                        if (!isselected) {
+                            category.innerHTML = "";
+                            if (data.length) data.splice(0, data.length);
+                            var channelitems = channel.querySelectorAll(".item");
+                            for (var j = 0; j < channelitems.length; j++) {
+                                channelitems[j].classList.remove("selected");
+                            }
+                            this.classList.add("selected");
+                            settings.values["nowChannel"] = this.dataset.id;
+                            initCategoryItems();
+                        }
+                        if (this.disabled === true) {
+                            this.classList.remove("selected");
+                        }
+                    });
+                    if (NString.equals(nowChannel, sp.id)) {
+                        cnode.classList.add("selected");
+                        initCategoryItems();
+                    }
+                }
+                var nowSelected = channel.querySelector(".selected");
+                if (!nowSelected) {
+                    var firstNode = channel.querySelector(".item");
+                    if (firstNode) firstNode.click();
+                }
+            }
+            try {
+                if (datas.providers !== null && datas.providers !== undefined && datas.providers) {
+                    var nowProvider = settings.values["nowProvider"];
+                    for (var i = 0; i < datas.providers.length; i++) {
+                        var sp = datas.providers[i];
+                        var pnode = createItem(sp.id, sp.displayName, ITEM_NAMESPACE.provider);
+                        provider.appendChild(pnode);
+                        WinJS.UI.Animation.createAddToListAnimation(pnode, provider).execute();
+                        pnode.addEventListener("click", function (event) {
+                            var isselected = this.classList.contains("selected");
+                            if (!isselected) {
+                                channel.innerHTML = "";
+                                category.innerHTML = "";
+                                if (data.length) data.splice(0, data.length);
+                                var provideritems = provider.querySelectorAll(".item");
+                                for (var j = 0; j < provideritems.length; j++) {
+                                    provideritems[j].classList.remove("selected");
+                                }
+                                this.classList.add("selected");
+                                settings.values["nowProvider"] = this.dataset.id;
+                                initChannelItems();
+                            }
+                            if (this.disabled === true) {
+                                this.classList.remove("selected");
+                            }
+                        });
+                        if (NString.equals(nowProvider, sp.id)) {
+                            pnode.classList.add("selected");
+                            initChannelItems();
+                        }
+                    }
+                    var nowSelected = provider.querySelector(".selected");
+                    if (!nowSelected) {
+                        var firstNode = provider.querySelector(".item");
+                        if (firstNode) firstNode.click();
+                    }
+                }
+            } catch (e) {
+                initFeedList();
+            }
+        });
+    }
+    function initWhenBack() {
+        listViewEl = document.getElementById("listviewbox");
+        var listView = listViewEl.winControl;
+        listView.itemDataSource = data.dataSource;
+        listView.addEventListener("iteminvoked", function (e) {
+            e.detail.itemPromise.done(function (invokedItem) {
+                var data = invokedItem.data;
+                WinJS.Navigation.navigate("/pages/article/article.html", {
+                    key: {
+                        provider: settings.values["nowProvider"],
+                        channel: settings.values["nowChannel"],
+                        category: settings.values["nowCategory"],
+                        articleurl: data.url
+                    }
+                });
+            });
+        });
+        initFeedListWhenBack();
+    }
+    var isBack = false;
+    function init() {
+        if (!isBack) {
+            isBack = true;
+            initWhenFirst();
+        } else {
+            initWhenBack();
+        }
     }
     WinJS.UI.Pages.define("/pages/home/home.html", {
         // 每当用户导航至该页面时都要调用此函数。它
@@ -1800,7 +1983,7 @@
                         }
                     });
                 }
-                
+
             }).then(function () {
                 WinJS.Resources.processAll();
             });
